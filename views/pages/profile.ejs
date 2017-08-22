@@ -1,0 +1,70 @@
+<% include header %>
+<h2 class="ui header">
+  <% for (user of user) { %>
+
+  Bonjour <%= user.pseudo %> !
+  <div class="sub header"> Complete ton profil</div>
+</h2>
+
+	<!-- FORMULAIRE DE CONNEXION -->
+<form class="ui tiny form segment" method="post" >
+  <!--<p><strong>à propos de vous<strong></p><br>-->
+  <div class="one field">
+	  <label>Email</label>
+	  <input value="<%= user.email %>" type="email" name="email">
+  </div>
+  <div class="two fields">
+    <div class="field">
+      <label>Nom</label>
+      <input value="<%= user.lastname %>" name="lastname" type="text">
+    </div>
+	<div class="field">
+      <label>Prenom</label>
+      <input value="<%= user.name %>" name="firstname" type="text">
+    </div>
+  </div>
+  <div class="two fields">
+    <div class="field">
+      <label for="username">Pseudo</label>
+      <input value="<%= user.pseudo %>" name="pseudo" id="pseudo" type="text">
+    </div>
+	<div class="field">
+      <label>Sexe</label>
+      <select class="ui dropdown" name="gender">
+        <option value="<%= user.gender %>"><%= user.gender %></option>
+        <option value="Homme">Homme</option>
+        <option value="Femme">Femme</option>
+      </select>
+    </div>
+  </div>
+  <div class="two fields">
+	<div class="field">
+      <label>Interessé par: </label>
+      <select class="ui dropdown" name="match_g">
+        <option value="<%= user.match_g %>"><%= user.match_g %></option>
+        <option value="Homme">Homme</option>
+        <option value="Femme">Femme</option>
+      </select>
+    </div>
+	<div class="field">
+		<label for="bio">Décrivez vous: </label>
+		<textarea name="bio" id="bio" rows="1" cols='100'><%= user.bio %></textarea>
+    </div>
+  </div>
+  <div class="two fields">
+  <div class="field">
+      <!--<label>Upload tes photos: </label>-->
+	  <!--<input type="file" name="uploadfile">-->
+  </div>
+  </div>
+    <center>
+		<button value="modif" name="form" type="submit" class="ui blue labeled submit icon button">
+			<i class="icon edit"></i>Mettre a jour
+		</button>
+    </center>
+  <% } %>
+</form>
+
+
+
+<% include footer %>

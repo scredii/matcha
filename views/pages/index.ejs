@@ -1,0 +1,75 @@
+<% include header %>
+
+<div class="ui horizontal divider">Se connecter</div>
+
+	<!-- FORMULAIRE DE CONNEXION -->
+<form class="ui tiny form segment" method="post">
+	<div class="one field">
+		<label for="email">email</label>
+		<input placeholder="email" name="email" id="email" type="text">
+	</div>
+	<div class="one field">
+		<label for="password">password</label>
+		<input placeholder="password" name="password" id="password" type="password">
+	</div>
+	<center>
+	<button value="connect" name="form" type="submit" class="ui blue labeled submit icon button">
+		<i class="icon edit"></i>Envoyer
+	</button>
+	</center>
+</form>
+<center>
+<a href="lost.ejs">Mot de passe oublié ? Cliquez ici</a>
+</center>
+
+	<!-- FORMULAIRE D'INSCRIPTION -->
+
+<div class="ui horizontal divider">S'inscrire</div>
+<form class="ui tiny form segment" method="post">
+  <!--<p><strong>à propos de vous<strong></p><br>-->
+  <div class="one field">
+	  <label>Email</label>
+	  <input placeholder="email" type="email" name="email">
+  </div>
+  <div class="two fields">
+    <div class="field">
+      <label>Nom</label>
+      <input placeholder="Nom" name="name" type="text">
+    </div>
+	<div class="field">
+      <label>Prenom</label>
+      <input placeholder="Prenom" name="firstname" type="text">
+    </div>
+  </div>
+  <div class="two fields">
+    <div class="field">
+      <label for="username">Pseudo</label>
+      <input placeholder="Pseudo" name="pseudo" id="pseudo" type="text">
+    </div>
+	<div class="field">
+      <label>Sexe</label>
+      <select class="ui dropdown" name="gender">
+        <option value="">Sexe</option>
+        <option value="Homme">Homme</option>
+        <option value="Femme">Femme</option>
+      </select>
+    </div>
+  </div>
+  <div class="two fields">	
+    <div class="field">
+      <label for="password">Mot de passe</label>
+      <input type="password" id="password" name="password">
+    </div>
+	<div class="field">
+      <label for="confirm_pass">Confirmation du mot de passe</label>
+      <input type="password" id="confirm_pass" name="confirm_pass">
+    </div>
+  </div>
+    <center>
+		<button value="subscribe" name="form" type="submit" class="ui blue labeled submit icon button">
+			<i class="icon edit"></i>Envoyer
+		</button>
+    </center>
+</form>
+
+<% include footer %>
