@@ -1,6 +1,7 @@
 let connexion = require('../config/setup');
 let moment = require('moment');
 let bcrypt = require('bcrypt');
+let md5 = require('md5');
 const saltRounds = 10;
 
 moment.locale('fr');
@@ -17,14 +18,69 @@ class user {
 	// get created_at (){
 	// 	return moment(this.row.created_at);
 	// }
-
+		// get date_naissance (){
+		// 	return moment(this.date_naissance);
+		// }
 	// get id (){
 	// 	return this.row.id;
 	// }
+	static	recup_tok(email,cb)
+	{
+		connexion.query('SELECT token FROM users WHERE email = ?', [email], (err, token) =>{
+			if (err) console.log(err);
+			if (token)
+			{
+				// console.log(err);
+				// if (err) throw err;
+				cb(token);
+			}
+			else
+			{
+				token = ""
+				cb(token);
+			}
+		});
+	}
+
+	static maj_password(user_infos, cb)
+	{
+		console.log(user_infos.password);
+		connexion.query('SELECT token FROM users WHERE email = ?', [user_infos.email], (err, token) =>{
+			if (err) throw err;
+			if (token[0].token.length > 0 && token[0].token === user_infos.token)
+			{
+				bcrypt.genSalt(saltRounds, function(err, salt)
+				{
+					bcrypt.hash(user_infos.password, salt, function(err, hash)
+					{
+						if (err)
+						{
+							console.log(err);
+						}
+						else
+						{
+							if (hash)
+							{
+								connexion.query('UPDATE users SET password = ? WHERE email = ?', [hash, user_infos.email], (err, ret) =>{
+									if (err) throw err;
+									cb(ret);
+								});
+							}
+						}
+					});
+				});
+			}
+			else
+			{
+				console.log("ERROR")
+			}
+		});
+	}
+
 	static	maj_account(content, session, cb)
 	{
 		// console.log(content.lastname);
-		connexion.query('UPDATE users SET pseudo = ?, name = ?, lastname = ?, email = ?, gender = ?, match_g = ?, bio = ? WHERE email = ?', [content.pseudo, content.firstname, content.lastname, content.email, content.gender, content.match_g, content.bio, session.email], (err, ret) =>{
+		connexion.query('UPDATE users SET pseudo = ?, name = ?, lastname = ?, email = ?, gender = ?, match_g = ?, bio = ?, date_naissance = ? WHERE email = ?', [content.pseudo, content.firstname, content.lastname, content.email, content.gender, content.match_g, content.bio, content.date_naissance, session.email], (err, ret) =>{
 		if (err) throw err;
 		cb(ret);
 		});
@@ -60,6 +116,8 @@ class user {
 
 	static create(content, cb)
 	{
+		var token = md5(content.password);
+		console.log(token)
 		bcrypt.genSalt(saltRounds, function(err, salt)
 		{
 			bcrypt.hash(content.password, salt, function(err, hash)
@@ -72,7 +130,7 @@ class user {
 				{
 					if (hash)
 					{
-						connexion.query('INSERT INTO users SET pseudo = ?, name = ?, lastname = ?, email = ?, password = ?, gender = ?', [content.pseudo, content.firstname, content.name, content.email, hash, content.gender], (err, result) => {
+						connexion.query('INSERT INTO users SET pseudo = ?, name = ?, lastname = ?, email = ?, password = ?, gender = ?, token = ?', [content.pseudo, content.firstname, content.name, content.email, hash, content.gender, token], (err, result) => {
 							if (err) throw err;
 							cb(result);
 						});

@@ -3,9 +3,28 @@
   <% for (user of user) { %>
 
   Bonjour <%= user.pseudo %> !
-  <div class="sub header"> Complete ton profil</div>
+  <div class="sub header"> Complete ton profil ici</div>
 </h2>
-
+<div class="ui card">
+  <div class="image">
+    <img src="assets/images/user_image/<%= pp[0].picture %>">
+  </div>
+  <div class="content">
+    <a class="header"><%= user.pseudo %></a>
+    <div class="meta">
+      <span class="date"><%= user.age.fromNow(true) %></span>
+    </div>
+    <div class="description">
+      <%= user.bio %>
+    </div>
+  </div>
+  <div class="extra content">
+    <a>
+      <i class="user icon"></i>
+      <!--<%= hashtag.hashtag %>-->
+    </a>
+  </div>
+</div>
 	<!-- FORMULAIRE DE CONNEXION -->
 <form class="ui tiny form segment" method="post" >
   <!--<p><strong>à propos de vous<strong></p><br>-->
@@ -52,6 +71,10 @@
     </div>
   </div>
   <div class="two fields">
+    <div class="field">
+      <label for="date_naissance">Date de naissance</label>
+      <input type="date"  name="date_naissance" value="<%= user.date_naissance %>" required>
+    </div>
   <div class="field">
       <!--<label>Upload tes photos: </label>-->
 	  <!--<input type="file" name="uploadfile">-->
@@ -63,8 +86,76 @@
 		</button>
     </center>
   <% } %>
+<a href="/lost">Changer mon mot de passe</a>
 </form>
+	
+	<!--FORMULAIRE HASHTAG-->
+<div class="ui horizontal segments">
+  <div class="ui segment">
+<form class="ui tiny form " method="post">
+	<center>
+		<h2 class="ui header">hashtag</h2>
+	</center>
+		<div class="field">
+			<div class="ui right labeled left icon input">
+				<i class="tags icon"></i>
+				<input placeholder="enter hashtag" name="hashtag" id="hashtag" type="text" maxlength="10">
+				<button value="hashtag" name="form" type="submit" class="ui tag label">Add Tag
+				</button>
+		</div>
+	</div>
+  
+	<div class="field">
+		<% for (hashtag of hashtag) { %>
+    
+		<a class="ui teal label"><%= hashtag.hashtag %>
+		<i class="delete icon"></i>
+		</a>
+	  	<% } %>
+	</div>
+</form>
+  </div>
+<!--FORMULAIRE GESTION PHOTOS-->
+<div class="ui segment">
+<form class="ui tiny form" role="form" method="post" enctype="multipart/form-data">
+	<center>
+		<h2 class="ui header">Mes photos</h2>
+	</center>
 
-
+	<!--<label for="mob_no" class="col-md-3 control-label"> Choisi une des tes photos !</label>-->
+	<div class="field">
+		<input class="form-control" type="file" name="photo" accept="image/*"/>
+	</div>
+    <center>
+		<button value="upload_photo" name="form" type="submit" class="ui blue labeled submit icon button">
+			<i class="icon edit"></i>Envoyer ma photo
+		</button>
+	</center>
+    
+  	<div class="ui tiny images">
+		<% for (picture of picture) { %>
+    
+      <a class="orange card">
+    <div class="image">
+ <div class="ui small basic icon buttons">
+<form class="ui form" method="post">
+  <input type="hidden" value="<%=  picture.picture %>" name="picture"/>
+  <button value="del_picture" name="form" type="submit"  class="ui button">
+    <i class="delete icon"></i>
+  </button>
+</form>
+ </div>
+      <img class="ui small rounded image" src="assets/images/user_image/<%=  picture.picture %>">
+      <form class="ui form" method="post">
+        <input type="hidden" value="<%=  picture.picture %>" name="picture"/>
+        <button value="profil_picture" name="form" type="submit" class="ui teal button">Profile</button>
+      </form>
+    </div>
+    
+    <% } %>
+  	</div>
+</form>
+</div>
+</div>
 
 <% include footer %>

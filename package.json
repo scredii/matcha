@@ -16,9 +16,19 @@
     "cookieparser": "^0.1.0",
     "ejs": "^2.5.7",
     "express": "^4.15.4",
+    "express-fileupload": "^0.1.4",
+    "express-mailer": "^0.3.1",
     "express-session": "^1.15.5",
+    "file-type": "^6.1.0",
+    "fs": "0.0.1-security",
+    "geolocator": "^2.1.1",
+    "image-size": "^0.6.1",
+    "md5": "^2.2.1",
+    "mmmagic": "^0.4.5",
     "moment": "^2.18.1",
-    "mysql": "^2.14.1",
+    "mysql": "github:mysqljs/mysql",
+    "nodemailer": "^4.0.1",
+    "randomatic": "^1.1.7",
     "semantic-ui": "^2.2.13"
   }
 }

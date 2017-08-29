@@ -28,13 +28,34 @@ class form{
 				else
 					bool(true);
 		}
+
 		if (content.form === 'modif')
 		{
 			// attention au textarea avec juste des space qui valide quand meme
 			if (content.email === "" || content.email === undefined  || content.lastname === "" || content.lastname === undefined ||
 				content.firstname === "" || content.firstname === undefined || content.pseudo === "" || content.pseudo === undefined
 				|| content.gender === "" || content.gender === undefined || content.match_g === "" || content.match_g === undefined
-				|| content.bio === "" || content.bio === undefined)
+				|| content.bio.trim() === "" || content.bio === undefined)
+				{
+					bool(false);
+				}
+				else
+					bool(true);
+		}
+
+		if (content.form === 'lost')
+		{
+			if (content.email === "" || content.email === undefined)
+				{
+					bool(false);
+				}
+				else
+					bool(true);
+		}
+
+		if (content.form === 'new_pass')
+		{
+			if (content.password === "" || content.password === undefined || content.confirm_pass === "" || content.confirm_pass === undefined)
 				{
 					bool(false);
 				}

@@ -1,0 +1,24 @@
+<% include header %>
+
+<div class="ui horizontal divider">Nouveau mot de passe</div>
+<form class="ui tiny form segment" method="post" >
+	<input type='hidden' name='token' value='<%= locals.token %>' />
+	<input type='hidden' name='email' value='<%= locals.email %>' />
+	<div class="two fields">	
+		<div class="field">
+			<label for="password">Mot de passe</label>
+			<input type="password" id="password" name="password">
+		</div>
+		<div class="field">
+			<label for="confirm_pass">Confirmation du mot de passe</label>
+			<input type="password" id="confirm_pass" name="confirm_pass">
+		</div>
+	</div>
+	<center>
+		<button value="new_pass" name="form" type="submit" class="ui blue labeled submit icon button">
+			<i class="icon edit"></i>Changer mon mot de passe
+		</button>
+    </center>
+</form>
+
+<% include footer %>

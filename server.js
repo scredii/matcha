@@ -7,14 +7,16 @@ let bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 let session = require('express-session');
 let form = require('./models/form');
+let moment = require('moment');
+let fileUpload = require('express-fileupload');
 var bool = "";
-
+ 
 // Moteur de template
 
 app.set('view engine', 'ejs');
 
 // Middleware
-
+app.use(fileUpload());
 app.use('/assets', express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -46,22 +48,91 @@ app.use(require('./middlewares/flash'));
 
 // Routes
 
+//Index
+app.get('/del_tag', function (req, res){
+	console.log('test');
+});
 app.get('/', function (req, res) {
+	if (req.url === '/' && req.session.authenticated == true) {
+		res.redirect('profile');
+		return;
+	}
+	else
 		res.render('pages/index');	
 });
 
+// GESTION DU NOUVEAU MOT DE PASSE
+app.get('/new_pass', function (req, res) {
+		// console.log(req.query);
+		res.locals.token = req.query.key;
+		res.locals.email = req.query.email;
+		res.render('pages/new_pass');	
+});
+
+app.post('/new_pass', function (req, res, next) {
+			form.valid(req.body, function(bool){
+				if (bool === false)
+				{
+					req.flash('error', "Merci de remplir tout les champs !")
+					res.redirect(req._parsedOriginalUrl.path);
+				}
+				else
+				{
+					if (req.body.password !== req.body.confirm_pass)
+					{
+						req.flash('error', "Les mots de passe ne correspondent pas !")
+						res.redirect(req._parsedOriginalUrl.path);
+					}
+					else
+					{
+						let user = require('./models/user');
+						user.maj_password(req.body, function (){
+							req.flash('success', "Mot de passe modifié avec succés !")
+							res.redirect('/');
+						});
+					}
+				}
+			});
+});
+
+
+//Page de profil
 app.get('/profile', function (req, res, next) {
 	let user = require('./models/user');
+	let hashtag = require('./models/hashtag');
+	let picture = require('./models/picture');
 	user.search_account(req, function (user){
-		res.render('pages/profile', {user: user});
+	
+	// change format date birth
+	user[0].date_naissance = moment(user[0].date_naissance).calendar();
+	var y = user[0].date_naissance.substr(6, 4);
+	var d = user[0].date_naissance.substr(0, 2);
+	var m = user[0].date_naissance.substr(3, 2);
+	user[0].date_naissance = y + "-" + m + "-" + d;
+	user[0].age = moment(user[0].date_naissance);
+		hashtag.all(req.session.identifiant, function(hashtag){
+
+			picture.profilpic(req.session.identifiant, function(pp){
+
+				picture.all(req.session.identifiant, function(picture){
+
+					res.render('pages/profile', {user: user, hashtag: hashtag, picture: picture, pp: pp});
+				});
+			});
+		});
 	});
 });
 
+//delogue
 app.get('/logout', function (req, res, next) {
 		delete req.session.authenticated;
 		res.redirect('/');
 	});
 
+app.get('/lost', function (req, res, next){
+	res.render('pages/lost');
+});
+// FORMULAIRE PAGE INDEX
 app.post('/', function (req, res, next) {
 
 	let user = require('./models/user');
@@ -92,6 +163,7 @@ app.post('/', function (req, res, next) {
 								// ACTIVATION DE LA SESSION + REDIRECTION.
 								req.session.authenticated = true;
 								req.session.email = results[0].email;
+								req.session.identifiant = results[0].id;
 								req.session.pseudo = results[0].pseudo;
 								// console.log(req.session);
 								res.redirect('/profile');
@@ -147,21 +219,129 @@ app.post('/', function (req, res, next) {
 // FORMULAIRE DE MODIF COMPTE
 app.post('/profile', function (req, res, next) {
 	let user = require('./models/user');
+	let picture = require('./models/picture')
+	if (req.body.form === 'modif')
+	{	
+		form.valid(req.body, function(bool){
+			console.log(bool);
+			if (bool === false)
+			{
+				req.flash('error', "Merci de remplir tout les champs !");
+				res.redirect('/profile');
+				console.log("Formulaire mal rempli");
+			}
+			else
+			{
+				user.maj_account(req.body, req.session, function(ret){
+					// console.log(ret);
+				});
+				req.flash('success', "Profil mis a jour avec succés !");
+				res.redirect('/profile');
+			}
+		});
+	}
+	else if (req.body.form === 'hashtag')
+	{
+		if (req.body.hashtag.trim() === "" || req.body.hashtag === undefined)
+		{
+			req.flash('error', "Inserer un hashtag valide");
+			res.redirect('/profile');
+		}
+		else
+		{
+			let hashtag = require('./models/hashtag');
+			hashtag.add(req.body.hashtag, req.session.identifiant, function(cb){
+				console.log(cb);
+			});
+			res.redirect('/profile');
+		}
+	}
+	else if (req.body.form === 'upload_photo')
+	{
+		if (req.files.photo == undefined)
+		{
+			req.flash('error', "Inserer une photo valide");
+			res.redirect('/profile');
+		}
+		else
+		{
+		picture.add(req.files.photo, req.session.identifiant, function(bool){
+			if (bool == "overload")
+			{
+				req.flash('error', "5 photos maximum autorisé");
+				res.redirect('/profile');
+				return;
+			}
+			else if (bool === true)
+			{
+				req.flash('success', "Upload photo OK");
+				res.redirect('/profile');
+				return;
+					
+			}
+			else
+			{
+				req.flash('error', "Inserer une photo valide");
+				res.redirect('/profile');
+				return;
+			}
+		});
+		}
+	}
+	else if (req.body.form === 'del_picture')
+	{
+		console.log(req.body.picture);
+		picture.del(req.body.picture, req.session.identifiant, function(bool){
+			if (bool === false)
+			{
+				req.flash('error', "Impossible de supprimer la photo selectionne");
+				res.redirect('/profile');
+			}
+			else
+			{
+				res.redirect('/profile');
+			}
+		});
+	}
+	else if (req.body.form === 'profil_picture')
+	{
+		console.log(req.body)
+		picture.pp(req.body.picture, req.session.identifiant);
+		req.flash('success', "Photo de profil mis a jour");
+		res.redirect('/profile');
+	}
+});
+
+// FORMULAIRE DE MODIF MOT DE PASSE
+app.post('/lost', function (req, res, next) {
+	let user = require('./models/user');
+	let mail = require('./models/mail');
 	form.valid(req.body, function(bool){
 		console.log(bool);
 		if (bool === false)
 		{
-			req.flash('error', "Merci de remplir tout les champs !");
-			res.redirect('/profile');
+			req.flash('error', "Merci de renseignez votre email !");
+			res.redirect('/lost');
 			console.log("Formulaire mal rempli");
 		}
 		else
 		{
-			user.maj_account(req.body, req.session, function(ret){
-				console.log(ret);
-			});
-			req.flash('success', "Profil mis a jour avec succés !");
-			res.redirect('/profile');
+			user.recup_tok(req.body.email, function(token){
+				if (token.length === 0)
+				{
+					req.flash('error', "Email non reconnu !");
+					res.redirect('/lost');
+				}
+				else
+				{
+				// console.log(token);
+				mail.send_lost(req.body.email, token, function(ret){
+				});
+				req.flash('success', "Un mail vient de vous etre envoyé !");
+				res.redirect('/lost');
+				}
+			})
+
 		}
 	});
 });
