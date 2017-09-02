@@ -10,7 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^1.0.2",
+    "axios": "^0.16.2",
+    "bcrypt": "^1.0.3",
     "body-parser": "^1.17.2",
     "cookie-parser": "^1.4.3",
     "cookieparser": "^0.1.0",
@@ -27,8 +28,9 @@
     "mmmagic": "^0.4.5",
     "moment": "^2.18.1",
     "mysql": "github:mysqljs/mysql",
-    "nodemailer": "^4.0.1",
+    "nodemailer": "^4.1.0",
     "randomatic": "^1.1.7",
+    "request": "^2.81.0",
     "semantic-ui": "^2.2.13"
   }
 }

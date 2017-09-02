@@ -10,7 +10,7 @@ let form = require('./models/form');
 let moment = require('moment');
 let fileUpload = require('express-fileupload');
 var bool = "";
- 
+let axios = require('axios');
 // Moteur de template
 
 app.set('view engine', 'ejs');
@@ -97,12 +97,13 @@ app.post('/new_pass', function (req, res, next) {
 
 
 //Page de profil
+
 app.get('/profile', function (req, res, next) {
 	let user = require('./models/user');
 	let hashtag = require('./models/hashtag');
 	let picture = require('./models/picture');
 	user.search_account(req, function (user){
-	
+
 	// change format date birth
 	user[0].date_naissance = moment(user[0].date_naissance).calendar();
 	var y = user[0].date_naissance.substr(6, 4);
@@ -216,8 +217,20 @@ app.post('/', function (req, res, next) {
 	}
 });
 
+app.post('/locate', (req, res) => {
+
+    // console.log(req.body.longitude.coords.latitude) //undefined
+    // console.log(req.body.longitude.coords.longitude) //undefined
+    // console.log(req.body.longitude.address.postalCode) //undefined
+    // console.log(req.body.longitude.address.city) //undefined
+	let location = require('./models/locate')
+	location.save_locate(req.body.longitude, req.session.identifiant);
+	res.redirect('/profile');
+})
+
 // FORMULAIRE DE MODIF COMPTE
 app.post('/profile', function (req, res, next) {
+	// console.log(req.body);
 	let user = require('./models/user');
 	let picture = require('./models/picture')
 	if (req.body.form === 'modif')

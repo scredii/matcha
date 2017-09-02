@@ -96,8 +96,8 @@ class picture {
 			static pp(picture, identifiant)
 			{
 				connexion.query('SELECT picture FROM pictures WHERE content_id = ? AND pp = 1', [identifiant], (err, result) => {
-					console.log(result)
-					console.log(result.length)
+					// console.log(result)
+					// console.log(result.length)
 					if (result.length === 0)
 					{
 						connexion.query('UPDATE pictures SET pp = 1 WHERE content_id = ? AND picture = ?', [identifiant, picture], (err) =>{
@@ -116,4 +116,5 @@ class picture {
 				});
 			}
 }
+
 module.exports = picture;

@@ -1,97 +1,103 @@
-<% include header %>
+<% include headerlocate %>
 <h2 class="ui header">
-  <% for (user of user) { %>
+	<% for (user of user) { %>
 
-  Bonjour <%= user.pseudo %> !
-  <div class="sub header"> Complete ton profil ici</div>
+	Bonjour <%= user.pseudo %> !
+	<div class="sub header"> Complete ton profil ici</div>
 </h2>
 <div class="ui card">
-  <div class="image">
-    <img src="assets/images/user_image/<%= pp[0].picture %>">
-  </div>
-  <div class="content">
-    <a class="header"><%= user.pseudo %></a>
-    <div class="meta">
-      <span class="date"><%= user.age.fromNow(true) %></span>
-    </div>
-    <div class="description">
-      <%= user.bio %>
-    </div>
-  </div>
-  <div class="extra content">
-    <a>
-      <i class="user icon"></i>
-      <!--<%= hashtag.hashtag %>-->
-    </a>
-  </div>
+			<% if (pp[0]) { %>
+	<div class="image">
+		<img src="assets/images/user_image/<%= pp[0].picture %>">
+	</div>
+			<% } %>
+	<div class="content">
+
+		<a class="header"><%= user.pseudo %></a>
+		<div class="meta">
+			<% if (  user.age ) { %>
+			<span class="date"><%= user.age.fromNow(true) %></span>
+			<% } %>
+		</div>
+		<div class="description">
+			<%= user.bio %>
+		</div>
+	</div>
+	<div class="extra content">
+		<a>
+				<i class="<%= user.gender %> icon"></i>
+			<!--<%= hashtag.hashtag %>-->
+		</a>
+	</div>
 </div>
 	<!-- FORMULAIRE DE CONNEXION -->
 <form class="ui tiny form segment" method="post" >
-  <!--<p><strong>à propos de vous<strong></p><br>-->
-  <div class="one field">
-	  <label>Email</label>
-	  <input value="<%= user.email %>" type="email" name="email">
-  </div>
-  <div class="two fields">
-    <div class="field">
-      <label>Nom</label>
-      <input value="<%= user.lastname %>" name="lastname" type="text">
-    </div>
+	<!--<p><strong>à propos de vous<strong></p><br>-->
+	<div class="one field">
+		<label>Email</label>
+		<input value="<%= user.email %>" type="email" name="email">
+	</div>
+	<div class="two fields">
+		<div class="field">
+			<label>Nom</label>
+			<input value="<%= user.lastname %>" name="lastname" type="text">
+		</div>
 	<div class="field">
-      <label>Prenom</label>
-      <input value="<%= user.name %>" name="firstname" type="text">
-    </div>
-  </div>
-  <div class="two fields">
-    <div class="field">
-      <label for="username">Pseudo</label>
-      <input value="<%= user.pseudo %>" name="pseudo" id="pseudo" type="text">
-    </div>
+			<label>Prenom</label>
+			<input value="<%= user.name %>" name="firstname" type="text">
+		</div>
+	</div>
+	<div class="two fields">
+		<div class="field">
+			<label for="username">Pseudo</label>
+			<input value="<%= user.pseudo %>" name="pseudo" id="pseudo" type="text">
+		</div>
 	<div class="field">
-      <label>Sexe</label>
-      <select class="ui dropdown" name="gender">
-        <option value="<%= user.gender %>"><%= user.gender %></option>
-        <option value="Homme">Homme</option>
-        <option value="Femme">Femme</option>
-      </select>
-    </div>
-  </div>
-  <div class="two fields">
+			<label>Sexe</label>
+			<select class="ui dropdown" name="gender">
+				<option value="<%= user.gender %>"><%= user.gender %></option>
+				<option value="male">Homme</option>
+				<option value="female">Femme</option>
+			</select>
+		</div>
+	</div>
+	<div class="two fields">
 	<div class="field">
-      <label>Interessé par: </label>
-      <select class="ui dropdown" name="match_g">
-        <option value="<%= user.match_g %>"><%= user.match_g %></option>
-        <option value="Homme">Homme</option>
-        <option value="Femme">Femme</option>
-      </select>
-    </div>
+			<label>Interessé par: </label>
+			<select class="ui dropdown" name="match_g">
+				<option value="all">Les deux</option>
+				<option value="male">Homme</option>
+				<option value="female">Femme</option>
+			</select>
+		</div>
 	<div class="field">
 		<label for="bio">Décrivez vous: </label>
 		<textarea name="bio" id="bio" rows="1" cols='100'><%= user.bio %></textarea>
-    </div>
-  </div>
-  <div class="two fields">
-    <div class="field">
-      <label for="date_naissance">Date de naissance</label>
-      <input type="date"  name="date_naissance" value="<%= user.date_naissance %>" required>
-    </div>
-  <div class="field">
-      <!--<label>Upload tes photos: </label>-->
-	  <!--<input type="file" name="uploadfile">-->
-  </div>
-  </div>
-    <center>
+		</div>
+	</div>
+	<div class="two fields">
+		<div class="field">
+			<label for="date_naissance">Date de naissance</label>
+			<input type="date"  name="date_naissance" value="<%= user.date_naissance %>" required>
+		</div>
+	<div class="field">
+			<label for="localisation">localisation</label>
+			<input value="" name="localisation" id="localisation" type="text">
+			<!--<p id="demo"></p>-->
+	</div>
+	</div>
+		<center>
 		<button value="modif" name="form" type="submit" class="ui blue labeled submit icon button">
 			<i class="icon edit"></i>Mettre a jour
 		</button>
-    </center>
-  <% } %>
+		</center>
+	<% } %>
 <a href="/lost">Changer mon mot de passe</a>
 </form>
 	
 	<!--FORMULAIRE HASHTAG-->
 <div class="ui horizontal segments">
-  <div class="ui segment">
+	<div class="ui segment">
 <form class="ui tiny form " method="post">
 	<center>
 		<h2 class="ui header">hashtag</h2>
@@ -104,17 +110,17 @@
 				</button>
 		</div>
 	</div>
-  
+	
 	<div class="field">
 		<% for (hashtag of hashtag) { %>
-    
+		
 		<a class="ui teal label"><%= hashtag.hashtag %>
 		<i class="delete icon"></i>
 		</a>
-	  	<% } %>
+			<% } %>
 	</div>
 </form>
-  </div>
+	</div>
 <!--FORMULAIRE GESTION PHOTOS-->
 <div class="ui segment">
 <form class="ui tiny form" role="form" method="post" enctype="multipart/form-data">
@@ -126,36 +132,59 @@
 	<div class="field">
 		<input class="form-control" type="file" name="photo" accept="image/*"/>
 	</div>
-    <center>
+		<center>
 		<button value="upload_photo" name="form" type="submit" class="ui blue labeled submit icon button">
 			<i class="icon edit"></i>Envoyer ma photo
 		</button>
 	</center>
-    
-  	<div class="ui tiny images">
+		
+		<div class="ui tiny images">
 		<% for (picture of picture) { %>
-    
-      <a class="orange card">
-    <div class="image">
+		
+			<a class="orange card">
+		<div class="image">
  <div class="ui small basic icon buttons">
 <form class="ui form" method="post">
-  <input type="hidden" value="<%=  picture.picture %>" name="picture"/>
-  <button value="del_picture" name="form" type="submit"  class="ui button">
-    <i class="delete icon"></i>
-  </button>
+	<input type="hidden" value="<%=  picture.picture %>" name="picture"/>
+	<button value="del_picture" name="form" type="submit"  class="ui button">
+		<i class="delete icon"></i>
+	</button>
 </form>
  </div>
-      <img class="ui small rounded image" src="assets/images/user_image/<%=  picture.picture %>">
-      <form class="ui form" method="post">
-        <input type="hidden" value="<%=  picture.picture %>" name="picture"/>
-        <button value="profil_picture" name="form" type="submit" class="ui teal button">Profile</button>
-      </form>
-    </div>
-    
-    <% } %>
-  	</div>
+			<img class="ui small rounded image" src="assets/images/user_image/<%=  picture.picture %>">
+			<form class="ui form" method="post">
+				<input type="hidden" value="<%=  picture.picture %>" name="picture"/>
+				<button value="profil_picture" name="form" type="submit" class="ui teal button">Profile</button>
+			</form>
+		</div>
+		
+		<% } %>
+		</div>
 </form>
 </div>
 </div>
+<!--<script>
+var x = document.getElementById("demo");
 
+function getLocation() {
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(showPosition);
+		}
+		else { 
+				x.innerHTML = "Geolocation is not supported by this browser.";
+		}
+}
+
+function showPosition(position) {
+			console.log("HERE");
+			console.log(position);
+	
+		x.innerHTML = "Latitude: " + position.coords.latitude + 
+		"<br>Longitude: " + position.coords.longitude;
+		return axios.post('http://localhost:8080/locate', {
+        longitude: position.coords.longitude, 
+        latitude: position.coords.latitude, 
+    })
+}
+</script>-->
 <% include footer %>
