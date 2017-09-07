@@ -3,7 +3,8 @@ let moment = require('moment');
 let bcrypt = require('bcrypt');
 let md5 = require('md5');
 const saltRounds = 10;
-
+let location = require('../models/locate');
+let hashtag = require('../models/hashtag');
 moment.locale('fr');
 
 class user {
@@ -79,7 +80,21 @@ class user {
 
 	static	maj_account(content, session, cb)
 	{
-		// console.log(content.lastname);
+		// VERIFIER QUE LE MAIL NEXISTE PAS AVANT DE LA CHANGER
+		if (!content.locate && content.localisation !== "")
+		{
+			location.check_city(content.localisation, function(coords){
+				if (coords)
+				{
+					location.save_locate_city(coords, content.localisation, session.identifiant);
+				}
+			});
+
+		}
+		else if (content.locate && content.localisation === "")
+		{
+			console.log("Je veux etre en auto");
+		}
 		connexion.query('UPDATE users SET pseudo = ?, name = ?, lastname = ?, email = ?, gender = ?, match_g = ?, bio = ?, date_naissance = ? WHERE email = ?', [content.pseudo, content.firstname, content.lastname, content.email, content.gender, content.match_g, content.bio, content.date_naissance, session.email], (err, ret) =>{
 		if (err) throw err;
 		cb(ret);
@@ -147,12 +162,88 @@ class user {
 			bool(res);
 		});
 	}
-	// static all (cb){
-	// 	connexion.query('SELECT * FROM messages', (err, rows) =>{
-	// 		if (err) throw err;
-	// 		cb(rows.map((row) => new Message (row)));
-	// 	});
-	// }
+
+	static all_profile(cb)
+	{
+		connexion.query('SELECT * FROM users INNER JOIN locations ON users.id = locations.id_content INNER JOIN pictures ON users.id = pictures.content_id AND pp = 1', (err, rows) =>{
+			if (err) throw err;
+			// console.log(result)
+			// cb(result);
+			cb(rows.map((row) => new user (row)));
+		});
+
+		// connexion.query('SELECT U.*, L.latitude, L.longitude, P.picture, H.hashtag FROM users U INNER JOIN locations L ON U.id = L.id_content INNER JOIN pictures P ON U.id = P.content_id AND P.pp = 1 INNER JOIN hashtag H ON U.id = H.content_id ORDER BY U.id', (err, rows) =>{
+		// 	if (err) throw err;
+		// 	console.log(rows)
+		// 	// cb(result);
+		// 	cb(rows.map((row) => new user (row)));
+		// });
+
+	}
+	static all_hashtag(cb)
+	{
+		connexion.query('SELECT hashtag, content_id FROM hashtag ', (err, rows) =>{
+			if (err) throw err;
+			console.log(rows)
+			// cb(result);
+			cb(rows.map((row) => new user (row)));
+		});
+	}
+
+	constructor (row){
+		this.row = row;
+	}
+// DB USERS
+	get pseudo (){
+		return this.row.pseudo;
+	}
+	get name (){
+		return this.row.name;
+	}
+	get lastname (){
+		return this.row.name;
+	}
+	get gender (){
+		return this.row.gender;
+	}
+	get hashtag (){
+		return this.row.hashtag;
+	}
+	get match_g (){
+		return this.row.match_g;
+	}
+	get bio (){
+		return this.row.bio;
+	}
+	get date_naissance (){
+		return moment(this.row.date_naissance);
+	}
+	get id (){
+		return this.row.id;
+	}
+// DB LOCATIONS
+	get latitude (){
+		return this.row.latitude;
+	}
+	get longitude (){
+		return this.row.longitude;
+	}
+	get id_content (){
+		return this.row.id_content;
+	}
+	get city (){
+		return this.row.city;
+	}
+// DB PICTURES
+	get picture (){
+		return this.row.picture;
+	}
+	get content_id (){
+		return this.row.content_id;
+	}
+	get pp (){
+		return this.row.pp;
+	}
 }
 
 module.exports = user;

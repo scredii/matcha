@@ -10,12 +10,14 @@ let form = require('./models/form');
 let moment = require('moment');
 let fileUpload = require('express-fileupload');
 var bool = "";
+let helmet = require('helmet');
 let axios = require('axios');
 // Moteur de template
 
 app.set('view engine', 'ejs');
 
 // Middleware
+app.use(helmet());
 app.use(fileUpload());
 app.use('/assets', express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -31,7 +33,7 @@ app.use(function checkAuth (req, res, next) {
 	console.log('checkAuth url: ' + req.url);
 	console.log('authenticated: ',req.session.authenticated);
 				// USE DB \\
-	if (req.url === '/profile' && (!req.session || !req.session.authenticated)) {
+	if (req.url === '/profile' && (!req.session || !req.session.authenticated) || req.url === '/galerie' && (!req.session || !req.session.authenticated)) {
 		res.render('./pages/unauthorised', { status: 403 });
 		return;
 	}
@@ -49,8 +51,13 @@ app.use(require('./middlewares/flash'));
 // Routes
 
 //Index
-app.get('/del_tag', function (req, res){
-	console.log('test');
+app.post('/del_tag', function (req, res, next){
+	let hashtag = require('./models/hashtag');
+	hashtag.del_tag(req.body.hashtag, req.body.id, req.session.identifiant ,function(){
+		//redirect non FONCTIONNELE
+		return res.render('pages/index', req.flash('error', "Merci de remplir tout les champs !"));
+	});
+
 });
 app.get('/', function (req, res) {
 	if (req.url === '/' && req.session.authenticated == true) {
@@ -102,8 +109,8 @@ app.get('/profile', function (req, res, next) {
 	let user = require('./models/user');
 	let hashtag = require('./models/hashtag');
 	let picture = require('./models/picture');
+	let locate = require('./models/locate');
 	user.search_account(req, function (user){
-
 	// change format date birth
 	user[0].date_naissance = moment(user[0].date_naissance).calendar();
 	var y = user[0].date_naissance.substr(6, 4);
@@ -117,12 +124,16 @@ app.get('/profile', function (req, res, next) {
 
 				picture.all(req.session.identifiant, function(picture){
 
-					res.render('pages/profile', {user: user, hashtag: hashtag, picture: picture, pp: pp});
+					locate.my_locate(req.session.identifiant, function(city){
+
+						res.render('pages/profile', {user: user, hashtag: hashtag, picture: picture, pp: pp, city: city});
+					});
 				});
 			});
 		});
 	});
 });
+
 
 //delogue
 app.get('/logout', function (req, res, next) {
@@ -218,16 +229,25 @@ app.post('/', function (req, res, next) {
 });
 
 app.post('/locate', (req, res) => {
-
-    // console.log(req.body.longitude.coords.latitude) //undefined
-    // console.log(req.body.longitude.coords.longitude) //undefined
-    // console.log(req.body.longitude.address.postalCode) //undefined
-    // console.log(req.body.longitude.address.city) //undefined
-	let location = require('./models/locate')
-	location.save_locate(req.body.longitude, req.session.identifiant);
+	let location = require('./models/locate');
+	location.save_locate(req.body.longitude, req.session.identifiant)
+	// req.flash('success', "Profil mis a jour avec succés !");	
 	res.redirect('/profile');
-})
+});
 
+//GALERY
+app.get('/galerie', function (req, res, next) {
+	let user = require('./models/user');
+	let hashtag = require('./models/hashtag');
+	user.all_profile(function(user_profile) {
+		// console.log("user_profile")
+		// console.log(user_profile)
+		user.all_hashtag(function(hashtag){
+			console.log(user_profile);
+			res.render('pages/galerie', { user_profile: user_profile, hashtag: hashtag });
+		})
+	});
+	});
 // FORMULAIRE DE MODIF COMPTE
 app.post('/profile', function (req, res, next) {
 	// console.log(req.body);

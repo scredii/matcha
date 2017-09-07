@@ -1,0 +1,55 @@
+<% include header %>
+
+	<div class="ui grid container">
+
+		<% for (user_profile of user_profile) { %>
+		<div class="four wide column">
+			
+			<div class="ui card">
+					<% if (user_profile) { %>
+			<div class="image">
+				<img src="assets/images/user_image/<%= user_profile.picture %>">
+			</div>
+					<% } %>
+			<div class="content">
+
+				<a class="header">
+						<i class="<%= user_profile.gender %> icon"></i>
+					<%= user_profile.pseudo %></a>
+				<div class="meta">
+					<% if (  user_profile.date_naissance ) { %>
+					<span class="date"><%= user_profile.date_naissance.fromNow(true) %></span>
+					<% } %>
+				</div>
+				<div class="description">
+					
+					<%= user_profile.bio %>
+				</div>
+			</div>
+			<div class="extra content">
+				<a>
+					<% if (  user_profile.city ) { %>
+						
+					<%= user_profile.city %>
+					<% } %>
+					
+				</a>
+			<div class="content">
+				<%= hashtag
+					[ <%= user_profile.content_id %>]. 
+					hashtag 
+				%>
+				
+			</div>
+	
+			</div>
+			
+		</div>
+		
+			</div>
+			<% } %>
+			
+		</div>
+	
+<% include footer %>
+

@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/maps": "^0.4.3",
     "axios": "^0.16.2",
     "bcrypt": "^1.0.3",
     "body-parser": "^1.17.2",
@@ -23,6 +24,7 @@
     "file-type": "^6.1.0",
     "fs": "0.0.1-security",
     "geolocator": "^2.1.1",
+    "helmet": "^3.8.1",
     "image-size": "^0.6.1",
     "md5": "^2.2.1",
     "mmmagic": "^0.4.5",
@@ -31,6 +33,7 @@
     "nodemailer": "^4.1.0",
     "randomatic": "^1.1.7",
     "request": "^2.81.0",
-    "semantic-ui": "^2.2.13"
+    "semantic-ui": "^2.2.13",
+    "socket.io": "^2.0.3"
   }
 }

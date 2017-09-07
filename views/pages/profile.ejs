@@ -1,7 +1,6 @@
 <% include headerlocate %>
 <h2 class="ui header">
 	<% for (user of user) { %>
-
 	Bonjour <%= user.pseudo %> !
 	<div class="sub header"> Complete ton profil ici</div>
 </h2>
@@ -13,7 +12,9 @@
 			<% } %>
 	<div class="content">
 
-		<a class="header"><%= user.pseudo %></a>
+		<a class="header">
+				<i class="<%= user.gender %> icon"></i>
+			<%= user.pseudo %></a>
 		<div class="meta">
 			<% if (  user.age ) { %>
 			<span class="date"><%= user.age.fromNow(true) %></span>
@@ -25,8 +26,8 @@
 	</div>
 	<div class="extra content">
 		<a>
-				<i class="<%= user.gender %> icon"></i>
-			<!--<%= hashtag.hashtag %>-->
+
+			
 		</a>
 	</div>
 </div>
@@ -72,7 +73,7 @@
 		</div>
 	<div class="field">
 		<label for="bio">Décrivez vous: </label>
-		<textarea name="bio" id="bio" rows="1" cols='100'><%= user.bio %></textarea>
+		<textarea name="bio" id="bio" rows="1" cols='50' maxlength="150"><%= user.bio %></textarea>
 		</div>
 	</div>
 	<div class="two fields">
@@ -81,11 +82,16 @@
 			<input type="date"  name="date_naissance" value="<%= user.date_naissance %>" required>
 		</div>
 	<div class="field">
-			<label for="localisation">localisation</label>
-			<input value="" name="localisation" id="localisation" type="text">
-			<!--<p id="demo"></p>-->
+		<label for="localisation">localisation</label>
+		<div class="field">
+			<label for="locate">Je souhaite etre localisé :
+			<input type="checkbox" id="locate" name="locate" value="auto" onclick="locate_me();">
+		</label>
+		</div>
+		<label for="localisation">Ou rentre ta ville :</label>
+		<input value="" name="localisation" id="localisation" type="text">
 	</div>
-	</div>
+		</div>	
 		<center>
 		<button value="modif" name="form" type="submit" class="ui blue labeled submit icon button">
 			<i class="icon edit"></i>Mettre a jour
@@ -94,13 +100,15 @@
 	<% } %>
 <a href="/lost">Changer mon mot de passe</a>
 </form>
+	</div>
+
 	
 	<!--FORMULAIRE HASHTAG-->
 <div class="ui horizontal segments">
 	<div class="ui segment">
 <form class="ui tiny form " method="post">
 	<center>
-		<h2 class="ui header">hashtag</h2>
+		<h2 class="ui header">#hashtag</h2>
 	</center>
 		<div class="field">
 			<div class="ui right labeled left icon input">
@@ -113,9 +121,9 @@
 	
 	<div class="field">
 		<% for (hashtag of hashtag) { %>
-		
+		<!--<input type="hidden" value="<%= hashtag.id %>">-->
 		<a class="ui teal label"><%= hashtag.hashtag %>
-		<i class="delete icon"></i>
+		<i class="delete icon" onclick="del_hashtag( '<%= hashtag.hashtag %>' , ' <%= hashtag.id %>' )"></i>
 		</a>
 			<% } %>
 	</div>

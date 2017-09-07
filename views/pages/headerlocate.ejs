@@ -5,42 +5,16 @@
 	<title>First Page</title>
 	<link rel="stylesheet" href="assets/semantic/dist/semantic.min.css">
 	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-
-<script type="text/javascript" src="/assets/geolocator/dist/geolocator.min.js"></script>
-<script type="text/javascript">
-
-    geolocator.config({
-        language: "en",
-        google: {
-            version: "3",
-            key: "AIzaSyB9Gr5C1dfF_1NnemWPlD9ideN3DG6Dn4I"
-        }
-    });
- 
-    window.onload = function () {
-        var options = {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumWait: 10000,     // max wait time for desired accuracy 
-            maximumAge: 0,          // disable cache 
-            desiredAccuracy: 30,    // meters 
-            fallbackToIP: true,     // fallback to IP if Geolocation fails or rejected 
-            addressLookup: true,    // requires Google API key if true 
-            timezone: true,         // requires Google API key if true 
-            // map: "map-canvas",      // interactive map element id (or options object) 
-            staticMap: false         // map image URL (boolean or options object) 
-        };
-        geolocator.locate(options, function (err, location) {
-            if (err) return console.log(err);
-            console.log(location);
-			return axios.post('http://localhost:8080/locate', {
-				longitude: location, 
-    		});
-        });
-    };
- 
-</script> 
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+	<script type="text/javascript" src="/assets/geolocator/dist/geolocator.min.js"></script>
+	<script type="text/javascript" src="/assets/scripts.js"></script>
 	<style>
+		#ld {
+			display:none
+		}
+		#ld.active {
+			display:block;
+		}
 		.ui.small.basic.icon.buttons
 		{
 			border: none !important;
@@ -69,6 +43,7 @@
 	<a href="/" class="title item"><h1 class="ui red inverted header">Matcha.</h1></a>
 	<a href="/" class="header item">Accueil</a>
 	<a href="/logout" class="header item">Logout</a>
+	<a href="/galerie" class="header item">Galerie</a>
 </div>
 </header>
 <body>

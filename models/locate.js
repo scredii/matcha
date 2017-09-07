@@ -1,3 +1,82 @@
+let connexion = require('../config/setup');
+
+class location{
+
+	static check_city(city, cb)
+	{
+		let googleMapsClient = require('@google/maps').createClient({
+			key: 'AIzaSyB9Gr5C1dfF_1NnemWPlD9ideN3DG6Dn4I'
+		});
+		googleMapsClient.geocode({ address: city, language: 'fr-FR' }, function(err, response) {
+			if (err) throw err;
+			if (!err) {
+				cb(response.json.results[0])
+			}
+		});
+	}
+
+	static	save_locate(address, identifiant)
+	{
+		connexion.query('SELECT * FROM locations WHERE id_content = ?', [identifiant], (err, user) =>{
+			if (err) throw err;
+			console.log(user);
+			if (user.length === 0)
+			{
+				console.log("user non trouvé")
+				connexion.query('INSERT INTO locations SET latitude = ?, longitude = ?, city = ?, id_content = ?', [address.coords.latitude.toFixed(3), address.coords.longitude.toFixed(3), address.address.city, identifiant], (err, result) => {
+					if (err) throw err;
+					console.log(result);
+				});
+			}
+			else
+			{
+				console.log("user trouvé")
+				connexion.query('UPDATE locations SET latitude = ?, longitude = ?, city = ? WHERE id_content = ?', [address.coords.latitude.toFixed(3), address.coords.longitude.toFixed(3), address.address.city, identifiant], (err, result) => {
+					if (err) throw err;
+					console.log(result);
+				});
+			}
+		});
+	}
+
+		static	save_locate_city(address, city, identifiant)
+	{
+		console.log(address);
+		console.log(city);
+		console.log(identifiant);
+		connexion.query('SELECT * FROM locations WHERE id_content = ?', [identifiant], (err, user) =>{
+			if (err) throw err;
+			console.log(user);
+			if (user.length === 0)
+			{
+				console.log("user non trouvé")
+				connexion.query('INSERT INTO locations SET latitude = ?, longitude = ?, city = ?, id_content = ?', [address.geometry.location.lat.toFixed(3), address.geometry.location.lng.toFixed(3), address.formatted_address, identifiant], (err, result) => {
+					if (err) throw err;
+					console.log(result);
+				});
+			}
+			else
+			{
+				console.log("user trouvé")
+				connexion.query('UPDATE locations SET latitude = ?, longitude = ?, city = ? WHERE id_content = ?', [address.geometry.location.lat.toFixed(3), address.geometry.location.lng.toFixed(3), address.formatted_address, identifiant], (err, result) => {
+					if (err) throw err;
+					console.log(result);
+				});
+			}
+		});
+	}
+
+
+	static my_locate(identifiant, cb)
+	{
+		connexion.query('SELECT city from locations WHERE id_content = ?', [identifiant], (err, city) => {
+			if (err) throw err;
+			if (city) cb(city);
+		});
+	}
+}
+
+
 // alert(calcCrow(59.3293371,13.4877472,59.3225525,13.4619422).toFixed(1));
 
 
@@ -36,27 +115,5 @@
     //         alert("Something got wrong " + status);
     //       }
     //     });
-
-
-class location{
-
-	static	save_locate(address, identifiant)
-	{
-		//latitude
-		// var latitude = address.coords.latitude;
-		console.log(address.coords.latitude);
-		console.log(address.coords.longitude);
-		console.log(address.address.city);
-		// console.log(address.longitude.coords.latitude);
-		// var latitude = address.body.longitude.coords.latitude;
-		//longitude
-		//city
-		//id_content
-		    // console.log(req.body.longitude.coords.latitude) //undefined
-    // console.log(req.body.longitude.coords.longitude) //undefined
-    // console.log(req.body.longitude.address.postalCode) //undefined
-    // console.log(req.body.longitude.address.city) //undefined
-	}
-}
 
 module.exports = location;

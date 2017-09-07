@@ -31,11 +31,12 @@ class form{
 
 		if (content.form === 'modif')
 		{
+			// console.log(content);
 			// attention au textarea avec juste des space qui valide quand meme
 			if (content.email === "" || content.email === undefined  || content.lastname === "" || content.lastname === undefined ||
 				content.firstname === "" || content.firstname === undefined || content.pseudo === "" || content.pseudo === undefined
 				|| content.gender === "" || content.gender === undefined || content.match_g === "" || content.match_g === undefined
-				|| content.bio.trim() === "" || content.bio === undefined)
+				|| content.bio.trim() === "" || content.bio === undefined || !content.locate && content.localisation == "")
 				{
 					bool(false);
 				}
