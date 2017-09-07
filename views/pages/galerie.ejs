@@ -1,10 +1,8 @@
 <% include header %>
 
 	<div class="ui grid container">
-
 		<% for (user_profile of user_profile) { %>
 		<div class="four wide column">
-			
 			<div class="ui card">
 					<% if (user_profile) { %>
 			<div class="image">
@@ -12,7 +10,6 @@
 			</div>
 					<% } %>
 			<div class="content">
-
 				<a class="header">
 						<i class="<%= user_profile.gender %> icon"></i>
 					<%= user_profile.pseudo %></a>
@@ -35,11 +32,7 @@
 					
 				</a>
 			<div class="content">
-				<%= hashtag
-					[ <%= user_profile.content_id %>]. 
-					hashtag 
-				%>
-				
+   <li><%= [i] %></li>
 			</div>
 	
 			</div>

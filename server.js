@@ -229,6 +229,7 @@ app.post('/', function (req, res, next) {
 });
 
 app.post('/locate', (req, res) => {
+	console.log("JE SUIS LAAAA")
 	let location = require('./models/locate');
 	location.save_locate(req.body.longitude, req.session.identifiant)
 	// req.flash('success', "Profil mis a jour avec succés !");	
@@ -243,8 +244,8 @@ app.get('/galerie', function (req, res, next) {
 		// console.log("user_profile")
 		// console.log(user_profile)
 		user.all_hashtag(function(hashtag){
-			console.log(user_profile);
-			res.render('pages/galerie', { user_profile: user_profile, hashtag: hashtag });
+		// 	console.log(user_profile);
+			res.render('pages/galerie', { user_profile: user_profile, hashtag });
 		})
 	});
 	});
@@ -380,6 +381,6 @@ app.post('/lost', function (req, res, next) {
 });
 
 // ECOUTE PORT 8080
-app.listen(8080, function () {
+app.listen(4242, function () {
 	console.log('SERVEUR OK BITCH!');
 });

@@ -31,6 +31,7 @@
     "moment": "^2.18.1",
     "mysql": "github:mysqljs/mysql",
     "nodemailer": "^4.1.0",
+    "nodemon": "^1.12.0",
     "randomatic": "^1.1.7",
     "request": "^2.81.0",
     "semantic-ui": "^2.2.13",
