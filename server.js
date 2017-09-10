@@ -78,11 +78,26 @@ app.get('/new_pass', function (req, res) {
 		res.render('pages/new_pass');	
 });
 
-// app.get('/profile/ + req.url', function (req, res) {
-// 		// console.log(req.query);
-// 		console.log("HERE");
-// 		// res.render('pages/new_pass');	
-// });
+app.get('/user/:id', function (req, res) {
+	let user = require('./models/user');
+	let picture = require('./models/picture');
+	let hashtag = require('./models/hashtag');
+	user.getbyid(req.params.id, function(user){
+		picture.profilpic(req.params.id, function(pp){
+			picture.all(req.params.id, function(picture){
+				hashtag.all(req.params.id, function(hashtag){
+					console.log(hashtag)
+					console.log(picture)
+					console.log(pp)
+					res.render('pages/show', {user: user, picture: picture, pp: pp, hashtag: hashtag});
+				});
+			});
+		});
+	});
+	console.log(req.params.id);
+		console.log("HERE");
+		// res.render('pages/new_pass');	
+});
 
 app.post('/new_pass', function (req, res, next) {
 			form.valid(req.body, function(bool){

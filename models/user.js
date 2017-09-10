@@ -154,7 +154,14 @@ class user {
 			});
 		});
 	}
-
+	static getbyid(id, cb)
+	{
+		connexion.query('SELECT pseudo, name, lastname, gender, match_g, bio, date_naissance FROM users WHERE id = ?', [id], (err, user) => {
+			if (err) throw err;
+			console.log(user);
+			cb(user);
+		});
+	}
 	static compare_pass(pass, content, bool)
 	{
 		bcrypt.compare(content.password, pass[0].password, function(err, res) {

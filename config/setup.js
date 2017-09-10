@@ -4,7 +4,9 @@ let connexion	=	mysql.createConnection({
 	host:		'localhost',
 	user:		'root',
 	password:	'',
-	database:	'Matcha'
+	// database:	'Matcha',
+	database:	'matcha',
+	port:		3307
 
 });
  
