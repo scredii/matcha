@@ -1,11 +1,10 @@
 let mysql		=	require('mysql');
 let connexion	=	mysql.createConnection({
 
-	host:		'127.0.0.1',
-	port:		3307,
+	host:		'localhost',
 	user:		'root',
-	// password:	'root',
-	database:	'matcha'
+	password:	'',
+	database:	'Matcha'
 
 });
  
@@ -13,7 +12,7 @@ connexion.connect();
 
 module.exports = connexion;
 
-// connexion.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
+// connection.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
 //   if (error) throw error;
 //   console.log('The solution is: ', results[0].solution);
 // });

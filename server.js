@@ -16,6 +16,8 @@ let axios = require('axios');
 
 app.set('view engine', 'ejs');
 
+// PROFILE/ BUFGGG
+
 // Middleware
 app.use(helmet());
 app.use(fileUpload());
@@ -75,6 +77,12 @@ app.get('/new_pass', function (req, res) {
 		res.locals.email = req.query.email;
 		res.render('pages/new_pass');	
 });
+
+// app.get('/profile/ + req.url', function (req, res) {
+// 		// console.log(req.query);
+// 		console.log("HERE");
+// 		// res.render('pages/new_pass');	
+// });
 
 app.post('/new_pass', function (req, res, next) {
 			form.valid(req.body, function(bool){
@@ -229,7 +237,6 @@ app.post('/', function (req, res, next) {
 });
 
 app.post('/locate', (req, res) => {
-	console.log("JE SUIS LAAAA")
 	let location = require('./models/locate');
 	location.save_locate(req.body.longitude, req.session.identifiant)
 	// req.flash('success', "Profil mis a jour avec succés !");	
@@ -243,11 +250,11 @@ app.get('/galerie', function (req, res, next) {
 	user.all_profile(function(user_profile) {
 		// console.log("user_profile")
 		// console.log(user_profile)
-		user.all_hashtag(function(hashtag){
-		// 	console.log(user_profile);
-			res.render('pages/galerie', { user_profile: user_profile, hashtag });
+		// user.all_hashtag(function(hashtag){
+			// console.log(user_profile);
+			res.render('pages/galerie', { user_profile: user_profile });
 		})
-	});
+	// });
 	});
 // FORMULAIRE DE MODIF COMPTE
 app.post('/profile', function (req, res, next) {
@@ -381,6 +388,6 @@ app.post('/lost', function (req, res, next) {
 });
 
 // ECOUTE PORT 8080
-app.listen(4242, function () {
+app.listen(8080, function () {
 	console.log('SERVEUR OK BITCH!');
 });

@@ -24,7 +24,7 @@
 		geolocator.locate(options, function (err, location) {
 			if (err) return console.log(err);
 			console.log(location);
-			return axios.post('http://localhost:4242/locate', {
+			return axios.post('http://localhost:8080/locate', {
 				longitude: location,
 			});
 		});
@@ -33,7 +33,7 @@
 
 	function del_hashtag(hashtag, id)
 	{
-		return axios.post('http://localhost:4242/del_tag', {
+		return axios.post('http://localhost:8080/del_tag', {
 				id: id,
 				hashtag: hashtag,
 			});

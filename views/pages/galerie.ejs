@@ -1,47 +1,50 @@
 <% include header %>
-
-	<div class="ui grid container">
-		<% for (user_profile of user_profile) { %>
-		<div class="four wide column">
-			<div class="ui card">
-					<% if (user_profile) { %>
-			<div class="image">
-				<img src="assets/images/user_image/<%= user_profile.picture %>">
-			</div>
-					<% } %>
-			<div class="content">
-				<a class="header">
-						<i class="<%= user_profile.gender %> icon"></i>
-					<%= user_profile.pseudo %></a>
-				<div class="meta">
-					<% if (  user_profile.date_naissance ) { %>
-					<span class="date"><%= user_profile.date_naissance.fromNow(true) %></span>
-					<% } %>
-				</div>
-				<div class="description">
-					
-					<%= user_profile.bio %>
-				</div>
-			</div>
-			<div class="extra content">
-				<a>
-					<% if (  user_profile.city ) { %>
-						
-					<%= user_profile.city %>
-					<% } %>
-					
-				</a>
-			<div class="content">
-   <li><%= [i] %></li>
-			</div>
-	
-			</div>
-			
-		</div>
-		
-			</div>
-			<% } %>
-			
+		<% var previous_id = ""; %>
+		<div class="ui grid container">
+			<% for (user_profile of user_profile) { %>
+			<% if (user_profile.id !== previous_id) { %>
+				<div class="four wide column">
+					<div class="ui link cards">
+						<div class="card">
+							<div class="image profile">
+								<img id="image_profile" src="assets/images/user_image/<%= user_profile.picture %>">
+							</div>
+							<div class="content">
+								<i class="right floated like icon"></i>
+								<a class="header">
+								<i class="<%= user_profile.gender %> icon"></i>
+								<%= user_profile.pseudo %>
+								</a>
+								<div class="meta">
+									<% if (  user_profile.date_naissance ) { %>
+										<span class="date"><%= user_profile.date_naissance.fromNow(true) %></span>
+									<% } %>
+								</div>
+								<div class="description">
+									<%= user_profile.bio %>
+								</div>
+							</div>
+							<div class="extra content">
+								<div class="ui divided items">
+									<% if (  user_profile.city ) { %>
+										<a>
+										<i class="marker icon"></i>
+										<%= user_profile.city %>
+										</a>
+									<% } %>
+								</div>
+									<div class="content">
+									<% if (user_profile.hashtag) { %>
+									<a class="ui teal label"> <%= user_profile.hashtag %> </a>
+									<% } %>
+									</div>
+							</div>
+						</div>
+					</div>
+					</div>
+				<% } %>
+				<% previous_id = user_profile.id; %>
+				<% } %>
 		</div>
 	
 <% include footer %>

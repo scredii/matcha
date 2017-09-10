@@ -165,16 +165,24 @@ class user {
 
 	static all_profile(cb)
 	{
-		connexion.query('SELECT * FROM users INNER JOIN locations ON users.id = locations.id_content INNER JOIN pictures ON users.id = pictures.content_id AND pp = 1', (err, rows) =>{
+		// connexion.query('SELECT * FROM users INNER JOIN locations ON users.id = locations.id_content INNER JOIN pictures ON users.id = pictures.content_id AND pp = 1', (err, rows) =>{
+		// 	if (err) throw err;
+		// 	// console.log(result)
+		// 	console.log(rows);
+		// 	cb(rows.map((row) => new user (row)));
+		// });
+
+		connexion.query('SELECT U.*, L.city, L.latitude, L.longitude, P.picture, H.hashtag FROM users U INNER JOIN locations L ON U.id = L.id_content INNER JOIN pictures P ON U.id = P.content_id AND P.pp = 1 LEFT JOIN hashtag H ON U.id = H.content_id ORDER BY U.id', (err, rows) =>{
 			if (err) throw err;
 			console.log(rows)
-			// // cb(result);
+			// cb(result);
 			cb(rows.map((row) => new user (row)));
 		});
+
 	}
 	static all_hashtag(cb)
 	{
-		connexion.query('SELECT hashtag, content_id FROM hashtag ', (err, rows) =>{
+		connexion.query('SELECT hashtag, content_id FROM hashtag GROUP BY content_id', (err, rows) =>{
 			if (err) throw err;
 			console.log(rows)
 			// cb(result);
@@ -199,7 +207,6 @@ class user {
 		return this.row.gender;
 	}
 	get hashtag (){
-		console.log("HERERER")
 		return this.row.hashtag;
 	}
 	get match_g (){

@@ -24,9 +24,8 @@
 			<%= user.bio %>
 		</div>
 	</div>
+	<% if (  city[0] ) { %>
 	<div class="extra content">
-			<% if (city[0]) { %>
-
 		<a>
 			<%= city[0].city %>
 			
@@ -34,6 +33,7 @@
 			<% } %>
 		
 	</div>
+	
 </div>
 	<!-- FORMULAIRE DE CONNEXION -->
 <form class="ui tiny form segment" method="post" >
