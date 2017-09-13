@@ -36,6 +36,7 @@
     "randomatic": "^1.1.7",
     "request": "^2.81.0",
     "semantic-ui": "^2.2.13",
+    "semver": "^5.4.1",
     "socket.io": "^2.0.3"
   }
 }

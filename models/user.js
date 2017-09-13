@@ -9,22 +9,6 @@ moment.locale('fr');
 
 class user {
 
-	// constructor (row){
-	// 	this.row = row;
-	// }
-
-	// get content (){
-	// 	return this.row.content;
-	// }
-	// get created_at (){
-	// 	return moment(this.row.created_at);
-	// }
-		// get date_naissance (){
-		// 	return moment(this.date_naissance);
-		// }
-	// get id (){
-	// 	return this.row.id;
-	// }
 	static	recup_tok(email,cb)
 	{
 		connexion.query('SELECT token FROM users WHERE email = ?', [email], (err, token) =>{
@@ -41,6 +25,26 @@ class user {
 				cb(token);
 			}
 		});
+	}
+
+	static popplus1(id)
+	{
+		//SECURISE PAR LA SESSION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		connexion.query('SELECT count(id) as rep FROM users WHERE id = ? LIMIT 1;', [id], (err, result) => {
+			console.log(result[0].rep)
+			if (result[0].rep !== 1)
+			{
+				console.log('pas de compte je me casse');
+				return;
+			}
+			else
+			{
+				console.log('bon ok je vais dans la db')
+			}
+		});
+		// connexion.query('UPDATE users SET populaire = populaire + 1 WHERE id = ?', [id], (err) =>{
+		// 	if (err) throw err;
+		// });
 	}
 
 	static maj_password(user_infos, cb)
@@ -95,7 +99,7 @@ class user {
 		{
 			console.log("Je veux etre en auto");
 		}
-		connexion.query('UPDATE users SET pseudo = ?, name = ?, lastname = ?, email = ?, gender = ?, match_g = ?, bio = ?, date_naissance = ? WHERE email = ?', [content.pseudo, content.firstname, content.lastname, content.email, content.gender, content.match_g, content.bio, content.date_naissance, session.email], (err, ret) =>{
+		connexion.query('UPDATE users SET pseudo = ?, name = ?, lastname = ?, email = ?, gender = ?, match_g = ?, bio = ?, age = ? WHERE email = ?', [content.pseudo, content.firstname, content.lastname, content.email, content.gender, content.match_g, content.bio, content.age, session.email], (err, ret) =>{
 		if (err) throw err;
 		cb(ret);
 		});
@@ -129,10 +133,21 @@ class user {
 		});
 	}
 
+	static pass_secure(password, cb){
+	if (password.length < 6)
+		 cb(false);
+	let hasUpperCase = /[A-Z]/.test(password);
+	let hasLowerCase = /[a-z]/.test(password);
+	let hasNumbers = /\d/.test(password);
+	let hasNonalphas = /\W/.test(password);
+	if (hasUpperCase + hasLowerCase + hasNumbers + hasNonalphas < 2)
+		cb(false);
+	else
+		cb(true);
+	}
 	static create(content, cb)
 	{
 		var token = md5(content.password);
-		console.log(token)
 		bcrypt.genSalt(saltRounds, function(err, salt)
 		{
 			bcrypt.hash(content.password, salt, function(err, hash)
@@ -156,9 +171,9 @@ class user {
 	}
 	static getbyid(id, cb)
 	{
-		connexion.query('SELECT pseudo, name, lastname, gender, match_g, bio, date_naissance FROM users WHERE id = ?', [id], (err, user) => {
+		connexion.query('SELECT users.pseudo, users.name, users.lastname, users.gender, users.match_g, users.bio, users.age,  locations.latitude, locations.longitude, locations.city FROM users LEFT JOIN locations  ON users.id = locations.id_content  WHERE users.id = ?', [id], (err, user) => {
 			if (err) throw err;
-			console.log(user);
+			// console.log(user);
 			cb(user);
 		});
 	}
@@ -179,7 +194,7 @@ class user {
 		// 	cb(rows.map((row) => new user (row)));
 		// });
 
-		connexion.query('SELECT U.*, L.city, L.latitude, L.longitude, P.picture, H.hashtag FROM users U INNER JOIN locations L ON U.id = L.id_content INNER JOIN pictures P ON U.id = P.content_id AND P.pp = 1 LEFT JOIN hashtag H ON U.id = H.content_id ORDER BY U.id', (err, rows) =>{
+		connexion.query('SELECT U.*, L.city, L.latitude, L.longitude, P.picture, H.hashtag FROM users U INNER JOIN locations L ON U.id = L.id_content LEFT JOIN pictures P ON U.id = P.content_id AND P.pp = 1 LEFT JOIN hashtag H ON U.id = H.content_id ORDER BY U.id', (err, rows) =>{
 			if (err) throw err;
 			console.log(rows)
 			// cb(result);
@@ -222,8 +237,8 @@ class user {
 	get bio (){
 		return this.row.bio;
 	}
-	get date_naissance (){
-		return moment(this.row.date_naissance);
+	get age (){
+		return this.row.age;
 	}
 	get id (){
 		return this.row.id;

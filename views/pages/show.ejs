@@ -1,3 +1,110 @@
 <% include header %>
-<p>ICI C LE PROFIL BITCH</p>
+	<div class="ui segment">
+		<center>
+		<% if (user[0]) { %>
+			<h2 >
+				<span><%= user[0].name %> <%= user[0].lastname %></span>
+				<div class="sub header"> Alias: <%= user[0].pseudo %></div>
+			</h2>
+			<div class="ui  clearing divider"></div>
+			<% if (pp[0]) { %>
+				<div class="ui two column middle aligned very relaxed stackable grid">
+		  			<div class="column">
+						<div class="ui card">
+							<div class="image">
+								<img src="/assets/images/user_image/<%= pp[0].picture %>">
+							</div>
+			<% } %>
+							<div class="content">
+								<a class="header">
+										<i class="<%= user[0].gender %> icon"></i>
+										<%= user[0].pseudo %>
+								</a>
+								<div class="meta">
+								<% if (  user[0].age !== null ) { %>
+									<span class="date"><%= user[0].age %> ans</span>
+								<% } %>
+								</div>
+								<div class="ui  clearing divider"></div>
+								<div class="description">
+									<%= user[0].bio %>
+								</div>
+							</div>
+							<% if (  user[0].city ) { %>
+							<div class="extra content">
+								<a>
+									<i class="marker icon"></i>
+									<%= user[0].city %>
+								</a>
+							<% } %>
+							</div>
+						</div>
+
+		<!--</div>-->
+</div>
+
+		<% if (hashtag.length !== 0) { %>
+		<div class="ui divided items">
+			<div class="item">
+		<span>Hashtag:</span>
+		
+		<div class="field">
+		<br />
+			
+
+		<% for (hashtag of hashtag) { %>
+		<a class="ui teal label"> <%= hashtag.hashtag %> </a>
+			<% } %>
+		</div>
+			</div>
+			<% } %>
+			<div class="item">
+		<span>Localisation:</span>
+		<div class="field">
+		<br />
+			<% if (  user[0].city ) { %>
+			<a>
+			<i class="marker icon"></i>
+			<%= user[0].city %> ( <%= diff %> km de toi)
+			</a>
+			<% } %>
+			
+		</div>
+</div>
+						<% if (picture) {  %>
+						<div class="ui medium bordered image ">
+							<div class="ui grid ">
+							<% for (picture of picture) { %>
+							<!--<div class="four wide column">-->
+								<div class="ui tiny images">
+									<img class="ui image" src="/assets/images/user_image/<%= picture.picture %>">
+								</div>
+							<% } %>
+						</div>
+					</div>
+</div>
+		
+			<% } %>
+			
+
+</div>
+
+			<div class="ui  clearing divider"></div>
+			<center>
+				<button value="modif" name="form" type="submit" class="ui red inverted labeled submit icon button">
+					<i class="icon edit"></i>Match!
+				</button>
+				
+			<center>
+			<% } %>
+				
+					<!--<button value="modif" name="form" type="submit" class="ui blue labeled submit icon button">
+				<i class="icon edit"></i>Mettre a jour
+			</button>-->
+			<% if (!user[0]) { %>
+			<p> Utilisateur inconnu </p>
+		<% } %>
+		</center>
+		
+	</div>
 <% include footer %>

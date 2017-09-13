@@ -31,6 +31,14 @@ app.use(session({
 	saveUninitialized: true,
 	cookie: { secure: false }
 }))
+app.use(function(req, res, next) {
+    if (req.path.substr(-1) == '/' && req.path.length > 1) {
+        var query = req.url.slice(req.path.length);
+        res.redirect(301, req.path.slice(0, -1) + query);
+    } else {
+        next();
+    }
+});
 app.use(function checkAuth (req, res, next) {
 	console.log('checkAuth url: ' + req.url);
 	console.log('authenticated: ',req.session.authenticated);
@@ -40,7 +48,7 @@ app.use(function checkAuth (req, res, next) {
 		return;
 	}
 	next();
-})
+});
 app.use(function(req, res, next) {
   res.locals.email = req.session.email;
   res.locals.pseudo = req.session.pseudo;
@@ -78,24 +86,36 @@ app.get('/new_pass', function (req, res) {
 		res.render('pages/new_pass');	
 });
 
-app.get('/user/:id', function (req, res) {
+app.get('/show/:id', function (req, res) {
 	let user = require('./models/user');
 	let picture = require('./models/picture');
 	let hashtag = require('./models/hashtag');
+	let locate = require('./models/locate');
+	user.popplus1(req.params.id);
 	user.getbyid(req.params.id, function(user){
 		picture.profilpic(req.params.id, function(pp){
-			picture.all(req.params.id, function(picture){
+			picture.allwithoutpp(req.params.id, function(picture){
 				hashtag.all(req.params.id, function(hashtag){
-					console.log(hashtag)
-					console.log(picture)
-					console.log(pp)
-					res.render('pages/show', {user: user, picture: picture, pp: pp, hashtag: hashtag});
+					locate.get_dist(req.session.identifiant, function(dist){
+						if (user[0] && req.session.identifiant)
+						{
+							// console.log(user[0].latitude)
+							locate.calcCrow(dist[0].latitude, dist[0].longitude, user[0].latitude, user[0].longitude, function(diff){
+								// console.log(pp);
+								res.render('pages/show', {user: user, picture: picture, pp: pp, hashtag: hashtag, diff: diff});
+							});
+						}
+						else
+						{
+								// res.render('pages/index', {user: user, picture: picture, pp: pp, hashtag: hashtag});
+							res.redirect('/');
+						}
+					});
 				});
 			});
 		});
 	});
-	console.log(req.params.id);
-		console.log("HERE");
+
 		// res.render('pages/new_pass');	
 });
 
@@ -134,13 +154,6 @@ app.get('/profile', function (req, res, next) {
 	let picture = require('./models/picture');
 	let locate = require('./models/locate');
 	user.search_account(req, function (user){
-	// change format date birth
-	user[0].date_naissance = moment(user[0].date_naissance).calendar();
-	var y = user[0].date_naissance.substr(6, 4);
-	var d = user[0].date_naissance.substr(0, 2);
-	var m = user[0].date_naissance.substr(3, 2);
-	user[0].date_naissance = y + "-" + m + "-" + d;
-	user[0].age = moment(user[0].date_naissance);
 		hashtag.all(req.session.identifiant, function(hashtag){
 
 			picture.profilpic(req.session.identifiant, function(pp){
@@ -234,9 +247,19 @@ app.post('/', function (req, res, next) {
 					user.check_register(req.body, function (results){
 						if (results.length == 0)
 						{
-							user.create(req.body, function (){
-								req.flash('success', "Votre compte a ete crée")
-								res.redirect('/');
+							user.pass_secure(req.body.password, function(secure){
+								if (secure === false)
+								{
+									req.flash('error', "Mot de passe non sécurisé")
+									res.redirect('/');
+								}
+								else
+								{
+									user.create(req.body, function (){
+										req.flash('success', "Votre compte a ete crée")
+										res.redirect('/');
+									});
+								}
 							});
 						}
 						else
@@ -267,6 +290,8 @@ app.get('/galerie', function (req, res, next) {
 		// console.log(user_profile)
 		// user.all_hashtag(function(hashtag){
 			// console.log(user_profile);
+			user_profile.myid = req.session.identifiant;
+			// console.log(user_profile.myid)
 			res.render('pages/galerie', { user_profile: user_profile });
 		})
 	// });
@@ -279,7 +304,14 @@ app.post('/profile', function (req, res, next) {
 	if (req.body.form === 'modif')
 	{	
 		form.valid(req.body, function(bool){
-			console.log(bool);
+			console.log(req.body.age);
+			if (req.body.age.length > 2 || !Number.isInteger(parseInt(req.body.age)))
+			{
+				req.flash('error', "Ton age n'est pas valide");
+				res.redirect('/profile');
+				console.log("Formulaire mal rempli");
+				return;
+			}
 			if (bool === false)
 			{
 				req.flash('error', "Merci de remplir tout les champs !");

@@ -16,8 +16,8 @@
 				<i class="<%= user.gender %> icon"></i>
 			<%= user.pseudo %></a>
 		<div class="meta">
-			<% if (  user.age ) { %>
-			<span class="date"><%= user.age.fromNow(true) %></span>
+			<% if (  user.age !== null ) { %>
+			<span class="date"><%= user.age %> ans</span>
 			<% } %>
 		</div>
 		<div class="description">
@@ -82,8 +82,8 @@
 	</div>
 	<div class="two fields">
 		<div class="field">
-			<label for="date_naissance">Date de naissance</label>
-			<input type="date"  name="date_naissance" value="<%= user.date_naissance %>" required>
+			<label for="age">Age</label>
+			<input type="number"  name="age" value="<%= user.age %>" min="0" max="99" required>
 		</div>
 	<div class="field">
 		<label for="localisation">localisation</label>

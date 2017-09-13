@@ -41,7 +41,7 @@ class picture {
 							else
 							{	
 								sizeOf('public/images/user_image/'+id_picture, function (err, dimensions) {
-									if (err) console.log(err);
+									// if (err) console.log(err);
 									if (!dimensions)
 									{
 										fs.unlink('public/images/user_image/'+id_picture, (err) =>{
@@ -72,7 +72,14 @@ class picture {
 					cb(hashtag);
 				});
 			};
-
+			
+			static allwithoutpp(identifiant, cb)
+			{
+				connexion.query('SELECT picture FROM pictures WHERE content_id = ? AND pp = 0', [identifiant], (err, hashtag) =>{
+					if (err) throw err;
+					cb(hashtag);
+				});
+			};
 			static del(picture, identifiant, cb)
 			{
 				connexion.query('SELECT picture FROM pictures WHERE content_id = ? AND picture = ?', [identifiant, picture], (err, result) => {
