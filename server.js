@@ -43,7 +43,7 @@ app.use(function checkAuth (req, res, next) {
 	console.log('checkAuth url: ' + req.url);
 	console.log('authenticated: ',req.session.authenticated);
 				// USE DB \\
-	if (req.url === '/profile' && (!req.session || !req.session.authenticated) || req.url === '/galerie' && (!req.session || !req.session.authenticated)) {
+	if (req.url === '/profile' && (!req.session || !req.session.authenticated) || req.url === '/galerie' && (!req.session || !req.session.authenticated)|| req.url === '/show/:id' && (!req.session || !req.session.authenticated)) {
 		res.render('./pages/unauthorised', { status: 403 });
 		return;
 	}
@@ -85,13 +85,33 @@ app.get('/new_pass', function (req, res) {
 		res.locals.email = req.query.email;
 		res.render('pages/new_pass');	
 });
-
+app.post('/show/:id', function (req, res) {
+	let user = require('./models/user');	
+	console.log(req.body);
+	if (req.body.form === "block")
+	{
+		user.block_user(req.session.identifiant, req.body.myid, req.body.userid, function(){
+			req.flash('success', "Utilisateur bloqué !")
+			res.redirect('/galerie');
+		});
+	}
+	if (req.body.form === "report")
+	{
+		console.log("form report")
+	}
+	if (req.body.form === "match")
+	{
+		console.log("form match")
+	}
+});
 app.get('/show/:id', function (req, res) {
 	let user = require('./models/user');
 	let picture = require('./models/picture');
 	let hashtag = require('./models/hashtag');
 	let locate = require('./models/locate');
-	user.popplus1(req.params.id);
+
+	if (req.session.identifiant && (req.params.id != req.session.identifiant)){
+		user.popplus1(req.params.id);}
 	user.getbyid(req.params.id, function(user){
 		picture.profilpic(req.params.id, function(pp){
 			picture.allwithoutpp(req.params.id, function(picture){
@@ -99,7 +119,8 @@ app.get('/show/:id', function (req, res) {
 					locate.get_dist(req.session.identifiant, function(dist){
 						if (user[0] && req.session.identifiant)
 						{
-							// console.log(user[0].latitude)
+							console.log(user[0])
+							user[0].myid = req.session.identifiant;
 							locate.calcCrow(dist[0].latitude, dist[0].longitude, user[0].latitude, user[0].longitude, function(diff){
 								// console.log(pp);
 								res.render('pages/show', {user: user, picture: picture, pp: pp, hashtag: hashtag, diff: diff});
@@ -107,7 +128,7 @@ app.get('/show/:id', function (req, res) {
 						}
 						else
 						{
-								// res.render('pages/index', {user: user, picture: picture, pp: pp, hashtag: hashtag});
+							// res.render('pages/index', {user: user, picture: picture, pp: pp, hashtag: hashtag});
 							res.redirect('/');
 						}
 					});
@@ -153,16 +174,18 @@ app.get('/profile', function (req, res, next) {
 	let hashtag = require('./models/hashtag');
 	let picture = require('./models/picture');
 	let locate = require('./models/locate');
-	user.search_account(req, function (user){
-		hashtag.all(req.session.identifiant, function(hashtag){
+	user.check_block(req.session.identifiant, function(user_blocked){
+		user.search_account(req, function (user){
+			hashtag.all(req.session.identifiant, function(hashtag){
 
-			picture.profilpic(req.session.identifiant, function(pp){
+				picture.profilpic(req.session.identifiant, function(pp){
 
-				picture.all(req.session.identifiant, function(picture){
+					picture.all(req.session.identifiant, function(picture){
 
-					locate.my_locate(req.session.identifiant, function(city){
+						locate.my_locate(req.session.identifiant, function(city){
 
-						res.render('pages/profile', {user: user, hashtag: hashtag, picture: picture, pp: pp, city: city});
+							res.render('pages/profile', {user: user, hashtag: hashtag, picture: picture, pp: pp, city: city, user_blocked: user_blocked});
+						});
 					});
 				});
 			});
@@ -288,12 +311,13 @@ app.get('/galerie', function (req, res, next) {
 	user.all_profile(function(user_profile) {
 		// console.log("user_profile")
 		// console.log(user_profile)
-		// user.all_hashtag(function(hashtag){
+		// user.check_block(req.session.identifiant, function(blocked){
 			// console.log(user_profile);
+			console.log(user_profile.user);
 			user_profile.myid = req.session.identifiant;
 			// console.log(user_profile.myid)
 			res.render('pages/galerie', { user_profile: user_profile });
-		})
+		});
 	// });
 	});
 // FORMULAIRE DE MODIF COMPTE

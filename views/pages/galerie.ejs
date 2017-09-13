@@ -1,10 +1,14 @@
 <% include header %>
 		<% var previous_id = ""; %>
 		<div class="ui grid container">
+			
 			<% for (user_profile of user_profile) { %>
-			<% if (user_profile.id !== previous_id &&  user_profile.picture && user_profile.myid !== user_profile.id) { %>
+								<%= user_profile.user_blocked %>
+			
+			<% if (user_profile.id !== previous_id &&  user_profile.picture) { %>
 				<div class="four wide column">
 					<div class="ui link cards">
+						
 						<div class="card">
 							<% if (user_profile.picture) { %>
 								<div class="image profile">

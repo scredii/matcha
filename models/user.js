@@ -9,6 +9,20 @@ moment.locale('fr');
 
 class user {
 
+	static check_block(myid, cb)
+	{
+		connexion.query('SELECT * FROM block WHERE by_id = ? ORDER BY by_id', [myid], (err, result) => {
+			cb(result);
+		});
+	}
+	static block_user(idsession, myid, userid,  cb)
+	{
+		connexion.query('INSERT INTO block SET user_blocked = ?, by_id = ?', [userid, myid], (err, result) =>{
+			if (err) console.log(err);
+			cb(result);
+		});
+	}
+
 	static	recup_tok(email,cb)
 	{
 		connexion.query('SELECT token FROM users WHERE email = ?', [email], (err, token) =>{
@@ -31,7 +45,7 @@ class user {
 	{
 		//SECURISE PAR LA SESSION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		connexion.query('SELECT count(id) as rep FROM users WHERE id = ? LIMIT 1;', [id], (err, result) => {
-			console.log(result[0].rep)
+			// console.log(result[0].rep)
 			if (result[0].rep !== 1)
 			{
 				console.log('pas de compte je me casse');
@@ -39,7 +53,10 @@ class user {
 			}
 			else
 			{
-				console.log('bon ok je vais dans la db')
+				console.log('bon ok je vais dans la db');
+				connexion.query('UPDATE users SET pop = pop + 1 WHERE id = ?', [id], (err, result) => {
+
+				});
 			}
 		});
 		// connexion.query('UPDATE users SET populaire = populaire + 1 WHERE id = ?', [id], (err) =>{
@@ -171,7 +188,7 @@ class user {
 	}
 	static getbyid(id, cb)
 	{
-		connexion.query('SELECT users.pseudo, users.name, users.lastname, users.gender, users.match_g, users.bio, users.age,  locations.latitude, locations.longitude, locations.city FROM users LEFT JOIN locations  ON users.id = locations.id_content  WHERE users.id = ?', [id], (err, user) => {
+		connexion.query('SELECT users.pseudo, users.id, users.name, users.lastname, users.gender, users.match_g, users.bio, users.age,  locations.latitude, locations.longitude, locations.city FROM users LEFT JOIN locations  ON users.id = locations.id_content  WHERE users.id = ?', [id], (err, user) => {
 			if (err) throw err;
 			// console.log(user);
 			cb(user);
@@ -187,16 +204,9 @@ class user {
 
 	static all_profile(cb)
 	{
-		// connexion.query('SELECT * FROM users INNER JOIN locations ON users.id = locations.id_content INNER JOIN pictures ON users.id = pictures.content_id AND pp = 1', (err, rows) =>{
-		// 	if (err) throw err;
-		// 	// console.log(result)
-		// 	console.log(rows);
-		// 	cb(rows.map((row) => new user (row)));
-		// });
-
-		connexion.query('SELECT U.*, L.city, L.latitude, L.longitude, P.picture, H.hashtag FROM users U INNER JOIN locations L ON U.id = L.id_content LEFT JOIN pictures P ON U.id = P.content_id AND P.pp = 1 LEFT JOIN hashtag H ON U.id = H.content_id ORDER BY U.id', (err, rows) =>{
+		connexion.query('SELECT U.*, L.city, L.latitude, L.longitude, P.picture, H.hashtag, B.user_blocked FROM users U INNER JOIN locations L ON U.id = L.id_content LEFT JOIN pictures P ON U.id = P.content_id AND P.pp = 1 LEFT JOIN hashtag H ON U.id = H.content_id LEFT JOIN block B ON B.by_id = U.id ORDER BY U.id', (err, rows) =>{
 			if (err) throw err;
-			console.log(rows)
+			// console.log(rows)
 			// cb(result);
 			cb(rows.map((row) => new user (row)));
 		});
@@ -230,6 +240,9 @@ class user {
 	}
 	get hashtag (){
 		return this.row.hashtag;
+	}
+	get user_blocked (){
+		return this.row.user_blocked;
 	}
 	get match_g (){
 		return this.row.match_g;
