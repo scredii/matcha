@@ -174,7 +174,7 @@ app.get('/profile', function (req, res, next) {
 	let hashtag = require('./models/hashtag');
 	let picture = require('./models/picture');
 	let locate = require('./models/locate');
-	user.check_block(req.session.identifiant, function(user_blocked){
+	// user.check_block(req.session.identifiant, function(user_blocked){
 		user.search_account(req, function (user){
 			hashtag.all(req.session.identifiant, function(hashtag){
 
@@ -184,14 +184,14 @@ app.get('/profile', function (req, res, next) {
 
 						locate.my_locate(req.session.identifiant, function(city){
 
-							res.render('pages/profile', {user: user, hashtag: hashtag, picture: picture, pp: pp, city: city, user_blocked: user_blocked});
+							res.render('pages/profile', {user: user, hashtag: hashtag, picture: picture, pp: pp, city: city});
 						});
 					});
 				});
 			});
 		});
 	});
-});
+// });
 
 
 //delogue
@@ -311,14 +311,25 @@ app.get('/galerie', function (req, res, next) {
 	user.all_profile(function(user_profile) {
 		// console.log("user_profile")
 		// console.log(user_profile)
-		// user.check_block(req.session.identifiant, function(blocked){
+		user.check_block(req.session.identifiant, function(blocked){
 			// console.log(user_profile);
-			console.log(user_profile.user);
+			var i = 0;
+			// while(user_profile[i].id)
+			// {
+			// 	if (user_profile[i].id === blocked[i].user_blocked)
+			// 	{
+			// 		console.log("HERE");
+			// 		user_profile[i].id.splice(i, 1);
+			// 	}
+			// 	i++;
+			// }
+			console.log(user_profile);
+			console.log(blocked);
 			user_profile.myid = req.session.identifiant;
 			// console.log(user_profile.myid)
 			res.render('pages/galerie', { user_profile: user_profile });
 		});
-	// });
+	});
 	});
 // FORMULAIRE DE MODIF COMPTE
 app.post('/profile', function (req, res, next) {

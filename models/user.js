@@ -12,6 +12,7 @@ class user {
 	static check_block(myid, cb)
 	{
 		connexion.query('SELECT * FROM block WHERE by_id = ? ORDER BY by_id', [myid], (err, result) => {
+			// console.log(result);
 			cb(result);
 		});
 	}
@@ -204,7 +205,7 @@ class user {
 
 	static all_profile(cb)
 	{
-		connexion.query('SELECT U.*, L.city, L.latitude, L.longitude, P.picture, H.hashtag, B.user_blocked FROM users U INNER JOIN locations L ON U.id = L.id_content LEFT JOIN pictures P ON U.id = P.content_id AND P.pp = 1 LEFT JOIN hashtag H ON U.id = H.content_id LEFT JOIN block B ON B.by_id = U.id ORDER BY U.id', (err, rows) =>{
+		connexion.query('SELECT U.*, L.city, L.latitude, L.longitude, P.picture, H.hashtag FROM users U INNER JOIN locations L ON U.id = L.id_content LEFT JOIN pictures P ON U.id = P.content_id AND P.pp = 1 LEFT JOIN hashtag H ON U.id = H.content_id ORDER BY U.id', (err, rows) =>{
 			if (err) throw err;
 			// console.log(rows)
 			// cb(result);

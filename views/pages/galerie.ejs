@@ -3,9 +3,7 @@
 		<div class="ui grid container">
 			
 			<% for (user_profile of user_profile) { %>
-								<%= user_profile.user_blocked %>
-			
-			<% if (user_profile.id !== previous_id &&  user_profile.picture) { %>
+			<% if (user_profile.id !== previous_id &&  user_profile.picture ) { %>
 				<div class="four wide column">
 					<div class="ui link cards">
 						
