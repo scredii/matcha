@@ -9,6 +9,27 @@ moment.locale('fr');
 
 class user {
 
+	static add_match(userliker, byuser, cb)
+	{
+		connexion.query('SELECT count(id) as rep FROM likes WHERE user_like = ? AND by_id = ? LIMIT 1;', [userliker, byuser], (err, result) => {
+			console.log(result[0]);
+			if (result[0].rep !== 1)
+			{
+				connexion.query('INSERT INTO likes SET user_like = ?, by_id = ?', [userliker, byuser], (err, result) => {
+					if (err) throw err;
+					cb(result);
+				});
+				return;
+			}
+			else
+			{
+				cb("already");
+			}
+		});
+
+
+	}
+
 	static check_block(myid, cb)
 	{
 		connexion.query('SELECT * FROM block WHERE by_id = ? ORDER BY by_id', [myid], (err, result) => {

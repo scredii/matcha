@@ -30,6 +30,30 @@ class send {
 				smtpTransport.close();
 			});
 		};
+
+			static send_report(userid, byid)
+			{
+				// console.log(token[0].token)
+				// console.log(uri)
+				var mail = {
+				from: "matcha42paris@gmail.com",
+				to: "matcha42paris@gmail.com",
+				subject: "Un membre a été signalé",
+				html: "Un membre (" + byid + ") vient de signaler l'utilisateur avec l'id: " + userid + "  --------------- Ceci est un mail automatique, Merci de ne pas y répondre."
+				}
+				smtpTransport.sendMail(mail, function (error, response){
+				if(error){
+					//RENVOYER LES ERREURS EN CAS D'ECHEC
+					//RENVOYER LES ERREURS EN CAS D'ECHEC
+					//RENVOYER LES ERREURS EN CAS D'ECHEC
+					console.log("Erreur lors de l'envoie du mail!");
+
+				}else{
+					console.log("Mail envoyé avec succès!")
+				}
+				smtpTransport.close();
+			});
+		};
 }
 
 module.exports = send;

@@ -35,6 +35,8 @@ CREATE TABLE users (id , pseudo , name, lastname , email , password , gender , m
 - online or date de derniere co
 - blocked
 
+FINIR LES MATCH ET SECURE TOUT CA
+FIXE LA POPULARITE
 
 										/===================\
 										|					|

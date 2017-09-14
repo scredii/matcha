@@ -3,7 +3,8 @@
 		<div class="ui grid container">
 			
 			<% for (user_profile of user_profile) { %>
-			<% if (user_profile.id !== previous_id &&  user_profile.picture ) { %>
+			
+			<% if (user_profile.id !== previous_id &&  user_profile.picture && user_profile.id !== myid) { %>
 				<div class="four wide column">
 					<div class="ui link cards">
 						

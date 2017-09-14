@@ -86,7 +86,8 @@ app.get('/new_pass', function (req, res) {
 		res.render('pages/new_pass');	
 });
 app.post('/show/:id', function (req, res) {
-	let user = require('./models/user');	
+	let user = require('./models/user');
+	let mail = require('./models/mail');
 	console.log(req.body);
 	if (req.body.form === "block")
 	{
@@ -98,10 +99,21 @@ app.post('/show/:id', function (req, res) {
 	if (req.body.form === "report")
 	{
 		console.log("form report")
+		// PENSEZ A BLOQUER LE USER ET NE PLUS LAFFICHER
+		//VEROUILLER LES SQL DU BUTTON
+		mail.send_report(req.body.userid, req.session.identifiant)
+		req.flash('success', "Utilisateur signalé, le profil va etre analysé. Merci !")
+		res.redirect('/galerie');
 	}
 	if (req.body.form === "match")
 	{
+		//VEROUILLER LES SQL DU BUTTON		
 		console.log("form match")
+		user.add_match(req.body.userid, req.session.identifiant, function(result){
+			console.log(result);
+			req.flash('success', "Un match vient d'etre envoyé a cet utilisateur");
+			res.redirect(req._parsedOriginalUrl.path);
+		});
 	}
 });
 app.get('/show/:id', function (req, res) {
@@ -110,8 +122,8 @@ app.get('/show/:id', function (req, res) {
 	let hashtag = require('./models/hashtag');
 	let locate = require('./models/locate');
 
-	if (req.session.identifiant && (req.params.id != req.session.identifiant)){
-		user.popplus1(req.params.id);}
+	// if (req.session.identifiant && (req.params.id != req.session.identifiant)){
+	// 	user.popplus1(req.params.id);}
 	user.getbyid(req.params.id, function(user){
 		picture.profilpic(req.params.id, function(pp){
 			picture.allwithoutpp(req.params.id, function(picture){
@@ -287,8 +299,8 @@ app.post('/', function (req, res, next) {
 						}
 						else
 						{
-								req.flash('error', "Pseudo ou email deja utilisé")
-								res.redirect('/');
+							req.flash('error', "Pseudo ou email deja utilisé")
+							res.redirect('/');
 						}
 					});
 				}
@@ -309,25 +321,12 @@ app.get('/galerie', function (req, res, next) {
 	let user = require('./models/user');
 	let hashtag = require('./models/hashtag');
 	user.all_profile(function(user_profile) {
-		// console.log("user_profile")
-		// console.log(user_profile)
 		user.check_block(req.session.identifiant, function(blocked){
-			// console.log(user_profile);
-			var i = 0;
-			// while(user_profile[i].id)
-			// {
-			// 	if (user_profile[i].id === blocked[i].user_blocked)
-			// 	{
-			// 		console.log("HERE");
-			// 		user_profile[i].id.splice(i, 1);
-			// 	}
-			// 	i++;
-			// }
 			console.log(user_profile);
-			console.log(blocked);
-			user_profile.myid = req.session.identifiant;
+			// console.log(blocked);
+			var myid = req.session.identifiant;
 			// console.log(user_profile.myid)
-			res.render('pages/galerie', { user_profile: user_profile });
+			res.render('pages/galerie', { user_profile: user_profile, blocked: blocked, myid: myid});
 		});
 	});
 	});
@@ -470,6 +469,6 @@ app.post('/lost', function (req, res, next) {
 });
 
 // ECOUTE PORT 8080
-app.listen(8080, function () {
+app.listen(4242, function () {
 	console.log('SERVEUR OK BITCH!');
 });
