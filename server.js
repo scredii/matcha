@@ -43,7 +43,10 @@ app.use(function checkAuth (req, res, next) {
 	console.log('checkAuth url: ' + req.url);
 	console.log('authenticated: ',req.session.authenticated);
 				// USE DB \\
-	if (req.url === '/profile' && (!req.session || !req.session.authenticated) || req.url === '/galerie' && (!req.session || !req.session.authenticated)|| req.url === '/show/:id' && (!req.session || !req.session.authenticated)) {
+	if (req.url === '/profile' && (!req.session || !req.session.authenticated) ||
+			req.url === '/galerie' && (!req.session || !req.session.authenticated)||
+				req.url === '/show/:id' && (!req.session || !req.session.authenticated) ||
+					req.url === '/notif' && (!req.session || !req.session.authenticated)) {
 		res.render('./pages/unauthorised', { status: 403 });
 		return;
 	}
@@ -83,8 +86,13 @@ app.get('/new_pass', function (req, res) {
 		// console.log(req.query);
 		res.locals.token = req.query.key;
 		res.locals.email = req.query.email;
-		res.render('pages/new_pass');	
+		res.render('pages/new_pass');
 });
+
+app.get('/notif', function(req, res){
+	res.render('pages/notif');
+});
+
 app.post('/show/:id', function (req, res) {
 	let user = require('./models/user');
 	let mail = require('./models/mail');
@@ -122,8 +130,10 @@ app.get('/show/:id', function (req, res) {
 	let hashtag = require('./models/hashtag');
 	let locate = require('./models/locate');
 
-	// if (req.session.identifiant && (req.params.id != req.session.identifiant)){
-	// 	user.popplus1(req.params.id);}
+	if (req.session.identifiant && (req.params.id != req.session.identifiant)){
+		// user.popplus1(req.params.id);
+		user.add_view(req.session.identifiant, req.params.id);
+	}
 	user.getbyid(req.params.id, function(user){
 		picture.profilpic(req.params.id, function(pp){
 			picture.allwithoutpp(req.params.id, function(picture){
@@ -189,13 +199,9 @@ app.get('/profile', function (req, res, next) {
 	// user.check_block(req.session.identifiant, function(user_blocked){
 		user.search_account(req, function (user){
 			hashtag.all(req.session.identifiant, function(hashtag){
-
 				picture.profilpic(req.session.identifiant, function(pp){
-
 					picture.all(req.session.identifiant, function(picture){
-
 						locate.my_locate(req.session.identifiant, function(city){
-
 							res.render('pages/profile', {user: user, hashtag: hashtag, picture: picture, pp: pp, city: city});
 						});
 					});
@@ -208,6 +214,8 @@ app.get('/profile', function (req, res, next) {
 
 //delogue
 app.get('/logout', function (req, res, next) {
+		let user = require('./models/user')
+		user.disconnect(req.session.identifiant);
 		delete req.session.authenticated;
 		res.redirect('/');
 	});
@@ -232,7 +240,6 @@ app.post('/', function (req, res, next) {
 			else
 			{
 				user.search_user(req.body, function(results){
-					// console.log(results);
 					if (results.length == 0)
 					{
 						res.render('pages/index', req.flash('error', "compte inconnu !"));
@@ -248,13 +255,13 @@ app.post('/', function (req, res, next) {
 								req.session.email = results[0].email;
 								req.session.identifiant = results[0].id;
 								req.session.pseudo = results[0].pseudo;
-								// console.log(req.session);
+								user.connected(req.session.identifiant);
 								res.redirect('/profile');
 								bool = "";
 							}
 							else
 							{
-								req.flash('error', 'Username and password are incorrect');
+								req.flash('error', 'Username and/or password are incorrect');
 								res.redirect('/');
 								console.log("Mot de passe incorrect");
 								bool = "";

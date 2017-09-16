@@ -9,10 +9,38 @@ moment.locale('fr');
 
 class user {
 
+	static get_visite(id, cb)
+	{
+		connexion.query('SELECT * FROM historical WHERE pageview_id = ?', [myid, idview], (err, result) =>{
+			if (err) console.log(err);
+		});
+	}
+
+	static add_view(myid, idview)
+	{
+		//VERIFIER LE DERNIER A AVOIR CHECK POUR NE PAS SPAAAM
+		connexion.query('INSERT INTO historical SET viewer_id = ?, pageview_id = ?', [myid, idview], (err, result) =>{
+			if (err) console.log(err);
+		});
+	}
+
+	static connected(id)
+	{
+		connexion.query('UPDATE users SET isconnected = 1 WHERE id = ?', [id], (err, result) =>{
+			if (err) console.log(err);
+		});
+	}
+
+	static disconnect(id)
+	{
+		connexion.query('UPDATE users SET isconnected = 0 WHERE id = ?', [id], (err, result) =>{
+			if (err) console.log(err);
+		});
+	}
 	static add_match(userliker, byuser, cb)
 	{
 		connexion.query('SELECT count(id) as rep FROM likes WHERE user_like = ? AND by_id = ? LIMIT 1;', [userliker, byuser], (err, result) => {
-			console.log(result[0]);
+			console.log(result)
 			if (result[0].rep !== 1)
 			{
 				connexion.query('INSERT INTO likes SET user_like = ?, by_id = ?', [userliker, byuser], (err, result) => {
@@ -26,8 +54,6 @@ class user {
 				cb("already");
 			}
 		});
-
-
 	}
 
 	static check_block(myid, cb)
@@ -210,7 +236,7 @@ class user {
 	}
 	static getbyid(id, cb)
 	{
-		connexion.query('SELECT users.pseudo, users.id, users.name, users.lastname, users.gender, users.match_g, users.bio, users.age,  locations.latitude, locations.longitude, locations.city FROM users LEFT JOIN locations  ON users.id = locations.id_content  WHERE users.id = ?', [id], (err, user) => {
+		connexion.query('SELECT users.pseudo, users.id, users.name, users.lastname, users.gender, users.match_g, users.bio, users.age, users.isconnected, locations.latitude, locations.longitude, locations.city FROM users LEFT JOIN locations  ON users.id = locations.id_content  WHERE users.id = ?', [id], (err, user) => {
 			if (err) throw err;
 			// console.log(user);
 			cb(user);
@@ -226,7 +252,7 @@ class user {
 
 	static all_profile(cb)
 	{
-		connexion.query('SELECT U.*, L.city, L.latitude, L.longitude, P.picture, H.hashtag FROM users U INNER JOIN locations L ON U.id = L.id_content LEFT JOIN pictures P ON U.id = P.content_id AND P.pp = 1 LEFT JOIN hashtag H ON U.id = H.content_id ORDER BY U.id', (err, rows) =>{
+		connexion.query('SELECT U.*, L.city, L.latitude, L.longitude, P.picture, H.hashtag FROM users U INNER JOIN locations L ON U.id = L.id_content LEFT JOIN pictures P ON U.id = P.content_id AND P.pp = 1 LEFT JOIN hashtag H ON U.id = H.content_id WHERE NOT EXISTS (SELECT * FROM block B WHERE U.id = B.user_blocked) ORDER BY U.id', (err, rows) =>{
 			if (err) throw err;
 			// console.log(rows)
 			// cb(result);
@@ -250,6 +276,9 @@ class user {
 // DB USERS
 	get pseudo (){
 		return this.row.pseudo;
+	}
+	get isconnected (){
+		return this.row.isconnected;
 	}
 	get name (){
 		return this.row.name;

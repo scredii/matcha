@@ -68,7 +68,16 @@
 			<%= user[0].city %> ( <%= diff %> km de toi)
 			</a>
 			<% } %>
-			
+			<% if (user[0].isconnected == 1) { %>
+			<div class="item">
+				<p><i class="green circle icon"></i>En ligne</p>
+			</div>
+			<% } %>
+			<% if (user[0].isconnected == 0) { %>
+			<div class="item">
+				<p><i class="red circle icon"></i>Hors ligne</p>
+			</div>
+			<% } %>
 		</div>
 </div>
 						<% if (picture) {  %>

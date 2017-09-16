@@ -1,9 +1,7 @@
 <% include header %>
 		<% var previous_id = ""; %>
 		<div class="ui grid container">
-			
 			<% for (user_profile of user_profile) { %>
-			
 			<% if (user_profile.id !== previous_id &&  user_profile.picture && user_profile.id !== myid) { %>
 				<div class="four wide column">
 					<div class="ui link cards">
@@ -37,7 +35,18 @@
 										<%= user_profile.city %>
 										</a>
 									<% } %>
-								</div>
+									<br/>
+									<% if (user_profile.isconnected == 1) { %>
+									<div class="item">
+										<p><i class="green circle icon"></i>En ligne</p>
+									</div>
+									<% } %>
+									<% if (user_profile.isconnected == 0) { %>
+									<div class="item">
+										<p><i class="red circle icon"></i>Hors ligne</p>
+									</div>
+									<% } %>
+									</div>
 									<div class="content">
 									<% if (user_profile.hashtag) { %>
 									<a class="ui teal label"> <%= user_profile.hashtag %> </a>
@@ -51,6 +60,5 @@
 				<% previous_id = user_profile.id; %>
 				<% } %>
 		</div>
-	
 <% include footer %>
 
