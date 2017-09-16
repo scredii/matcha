@@ -2,8 +2,80 @@
 		<!--<div class="ui grid container">-->
 		<div class="ui horizontal divider">Mes notifications</div>
 		<h3 class="ui header">Ces personnes ont consulté votre profil: </h3>
-		<!--<div class="ui section divider"></div>-->
+		<% if (visite) { %>
+		<div class="ui grid">
+		<% for (visite of visite){ %>
+		<div class="four wide column">
+			<div style="width: 10em;" class="ui card">
+				<a class="image" href="/show/<%= visite.viewer_id %>">
+					<img src="/assets/images/user_image/<%= visite.picture %>">
+				</a>
+				<div class="content">
+					<a class="header" href="/show/<%= visite.viewer_id %>"><%= visite.pseudo %></a>
+						<div class="meta">
+							<a><%= visite.date_view.fromNow() %></a>
+							<% if (visite.isconnected == 1) { %>
+							<div class="item">
+								<p><i class="green circle icon"></i>En ligne</p>
+							</div>
+							<% } %>
+							<% if (visite.isconnected == 0) { %>
+							<div class="item">
+								<p><i class="red circle icon"></i>Hors ligne</p>
+							</div>
+							<% } %>
+						</div>
+				</div>
+			</div>
+			</div>
+		<% } %>
+		</div>
+		<% } %>
+		<div class="ui section divider"></div>
 		<h3 class="ui header">Vos Match: </h3>
-		<!--</div>-->
-		
+		<% if (match) { %>
+		<div class="ui grid">
+		<% for (match of match){ %>
+		<div class="four wide column">
+			<div class="ui cards">
+				<div class="card">
+					<div class="content">
+					<img class="right floated mini ui image" src="/assets/images/user_image/<%= match.picture %>">
+					<div class="header">
+						<a href="/show/<%= match.id %>"><%= match.pseudo %></a>
+					</div>
+					<div class="meta">
+						<% if (match.isconnected == 1) { %>
+							<div class="item">
+								<p><i class="green circle icon"></i>En ligne</p>
+							</div>
+						<% } %>
+						<% if (match.isconnected == 0) { %>
+							<div class="item">
+								<p><i class="red circle icon"></i>Hors ligne</p>
+							</div>
+						<% } %>
+					</div>
+					<div class="meta">
+						<a><%= match.date_match.fromNow() %></a>
+					</div>
+					</div>
+					<div class="extra content">
+					<div class="ui two buttons">
+						<form method="post">
+							<input type="hidden" type="text" name="userid" value="<%= match.id %>" >
+							<button value="match" name="form" type="submit" class="ui red inverted labeled submit icon button">
+								<i class="heart icon"></i>Match!
+							</button>
+						</form>
+					</div>
+				</div>
+			</div>		
+		</div>
+	</div>
+	<% } %>
+	</div>
+	<% } %>
+		<div class="ui section divider"></div>
+		<h3 class="ui header">Match mutuelle: </h3>
 <% include footer %>

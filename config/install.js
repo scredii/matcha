@@ -53,13 +53,14 @@ connexion2.connect(function(err) {
     								console.log("Table block created");
 									if (result)
 									{
-										connexion2.query('CREATE TABLE likes (id INT(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, user_like INT(16) NOT NULL, by_id INT(16) NOT NULL)', (err, result) =>{
+										connexion2.query('CREATE TABLE likes (id INT(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, user_like INT(16) NOT NULL, by_id INT(16) NOT NULL, date_view TIMESTAMP DEFAULT CURRENT_TIMESTAMP)', (err, result) =>{
 	    								console.log("Table likes created");
 											if (result)
 											{
-												connexion.query('CREATE TABLE historical (id INT(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, viewer_id INT(16) NOT NULL, pageview_id INT(16) NOT NULL, date_view DATETIME NOT NULL)', (err, result) =>{
+												connexion2.query('CREATE TABLE historical (id INT(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, viewer_id INT(16) NOT NULL, pageview_id INT(16) NOT NULL, date_view TIMESTAMP DEFAULT CURRENT_TIMESTAMP)', (err, result) =>{
 												console.log("Table historical created");
-												connexion2.close();
+												// connexion2.close();
+												connexion2.end();
 												});
 											}
 										});

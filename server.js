@@ -90,13 +90,42 @@ app.get('/new_pass', function (req, res) {
 });
 
 app.get('/notif', function(req, res){
-	res.render('pages/notif');
+	let user = require('./models/user');
+	user.get_visite(req.session.identifiant, function(visite){
+		user.get_match(req.session.identifiant,function(match){
+			res.render('pages/notif', {visite: visite, match: match});
+		});
+	// console.log(visite)
+	});
+});
+
+app.post('/notif', function(req, res){
+	let user = require('./models/user');
+	console.log(req.body)
+	if (req.body.form === "match")
+	{
+		// VEROUILLER LES SQL DU BUTTON		
+		console.log("form match")
+		user.add_match(req.body.userid, req.session.identifiant, function(result){
+			console.log(result);
+			if (result === "already")
+			{
+				req.flash('success', "Vous avez deja envoyé un match a cette personne");
+				res.redirect('/notif');				
+			}
+			else
+			{
+			req.flash('success', "Un match vient d'etre envoyé a cet utilisateur");
+			res.redirect('/notif');
+			}
+		});
+	}
 });
 
 app.post('/show/:id', function (req, res) {
 	let user = require('./models/user');
 	let mail = require('./models/mail');
-	console.log(req.body);
+	// console.log(req.body);
 	if (req.body.form === "block")
 	{
 		user.block_user(req.session.identifiant, req.body.myid, req.body.userid, function(){

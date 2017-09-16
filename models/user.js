@@ -9,10 +9,27 @@ moment.locale('fr');
 
 class user {
 
+	static get_mutual_match(myid, userid, cb)
+	{
+		connexion.query('SELECT ')
+	}
+
+	static get_match(id, cb)
+	{
+		//VERIFIER SI CEST DEJA LE DERNIER POUR LE SHOOOOOTER
+		connexion.query('SELECT U.id, U.pseudo, U.isconnected, P.picture, L.date_match FROM users U INNER JOIN likes L ON L.by_id = U.id INNER JOIN pictures P ON L.by_id= P.content_id AND P.pp = 1 WHERE L.user_like = ? ORDER BY L.date_match DESC', [id], (err, rows) =>{
+			if (err) console.log(err);
+			cb(rows.map((row) => new user (row)));
+		});
+	}
+
 	static get_visite(id, cb)
 	{
-		connexion.query('SELECT * FROM historical WHERE pageview_id = ?', [myid, idview], (err, result) =>{
+		//VERIFIER SI CEST DEJA LE DERNIER POUR LE SHOOOOOTER
+		connexion.query('SELECT U.id, U.pseudo, U.isconnected, H.*, P.picture FROM users U INNER JOIN historical H ON H.`viewer_id` = U.id INNER JOIN pictures P ON H.viewer_id = P.content_id AND P.pp = 1 WHERE H.pageview_id = ? ORDER BY date_view DESC', [id], (err, rows) =>{
 			if (err) console.log(err);
+			// console.log(rows)
+			cb(rows.map((row) => new user (row)));
 		});
 	}
 
@@ -276,6 +293,9 @@ class user {
 // DB USERS
 	get pseudo (){
 		return this.row.pseudo;
+	}	
+	get date_match (){
+		return moment(this.row.date_match);
 	}
 	get isconnected (){
 		return this.row.isconnected;
@@ -285,6 +305,9 @@ class user {
 	}
 	get lastname (){
 		return this.row.name;
+	}	
+	get date_view (){
+		return moment(this.row.date_view);
 	}
 	get gender (){
 		return this.row.gender;
@@ -306,6 +329,9 @@ class user {
 	}
 	get id (){
 		return this.row.id;
+	}
+	get viewer_id (){
+		return this.row.viewer_id;
 	}
 // DB LOCATIONS
 	get latitude (){
