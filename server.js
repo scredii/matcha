@@ -93,9 +93,10 @@ app.get('/notif', function(req, res){
 	let user = require('./models/user');
 	user.get_visite(req.session.identifiant, function(visite){
 		user.get_match(req.session.identifiant,function(match){
-			// user.get_mutual_match(req.session.identifiant, 0, function(mutual){
-			res.render('pages/notif', {visite: visite, match: match});
-			// });
+			user.get_mutual_match(req.session.identifiant, function(mutual){
+				var myid = req.session.identifiant;
+			res.render('pages/notif', {visite: visite, match: match, mutual: mutual, myid: myid});
+			});
 		});
 	// console.log(visite)
 	});

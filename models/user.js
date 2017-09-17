@@ -9,11 +9,12 @@ moment.locale('fr');
 
 class user {
 
-	static get_mutual_match(myid, userid, cb)
+	static get_mutual_match(myid, cb)
 	{
-		connexion.query('SELECT l1.* FROM likes L1 INNER JOIN likes L2 ON L1.user_like = L2.by_id AND L2.user_like = L1.by_id WHERE L1.user_like = ?', [myid], (err, result) => {
+		connexion.query('SELECT l1.*, u.id, u.pseudo, u.isconnected FROM users U INNER JOIN likes L1 INNER JOIN likes L2 ON L1.user_like = L2.by_id AND L2.user_like = L1.by_id WHERE L2.user_like = ?', [myid], (err, rows) => {
 			if (err) throw err;
-			cb(result);
+			console.log(rows)
+			cb(rows.map((row) => new user (row)));
 		});
 	}
 
@@ -22,7 +23,6 @@ class user {
 		//VERIFIER SI CEST DEJA LE DERNIER POUR LE SHOOOOOTER
 		connexion.query('SELECT U.id, U.pseudo, U.isconnected, P.picture, L.date_match FROM users U INNER JOIN likes L ON L.by_id = U.id INNER JOIN pictures P ON L.by_id= P.content_id AND P.pp = 1 WHERE L.user_like = ? ORDER BY L.date_match DESC', [id], (err, rows) =>{
 			if (err) console.log(err);
-			console.log(rows)
 			cb(rows.map((row) => new user (row)));
 		});
 	}
@@ -311,7 +311,10 @@ class user {
 // DB USERS
 	get pseudo (){
 		return this.row.pseudo;
-	}	
+	}
+	get user_like (){
+		return this.row.user_like;
+	}		
 	get date_match (){
 		return moment(this.row.date_match);
 	}

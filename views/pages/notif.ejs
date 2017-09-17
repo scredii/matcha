@@ -78,4 +78,40 @@
 	<% } %>
 		<div class="ui section divider"></div>
 		<h3 class="ui header">Match mutuelle: </h3>
+		<% if (mutual) { %>
+			<div class="ui cards">
+			<% for (mutual of mutual) { %>
+			<% if (mutual.id !== myid) { %>
+				<div class="card">
+					<div class="content">
+					<div class="header">
+					<a href="/show/<%= mutual.user_like %>"> <%= mutual.pseudo %> </a>
+					</div>
+					<div class="meta">
+						<% if (mutual.isconnected == 1) { %>
+							<div class="item">
+								<p><i class="green circle icon"></i>En ligne</p>
+							</div>
+						<% } %>
+						<% if (mutual.isconnected == 0) { %>
+							<div class="item">
+								<p><i class="red circle icon"></i>Hors ligne</p>
+							</div>
+						<% } %>
+					</div>
+					<div class="meta">
+						<a><%= mutual.date_match.fromNow() %></a>
+					</div>
+					</div>
+					<div class="extra content">
+					<div class="ui two buttons">
+						<div class="ui basic green button">Approve</div>
+						<div class="ui basic red button">Decline</div>
+					</div>
+					</div>
+				</div>
+			<% } %>
+			<% } %>
+			</div>
+	<% } %>
 <% include footer %>
