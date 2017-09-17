@@ -11,7 +11,10 @@ class user {
 
 	static get_mutual_match(myid, userid, cb)
 	{
-		connexion.query('SELECT ')
+		connexion.query('SELECT l1.* FROM likes L1 INNER JOIN likes L2 ON L1.user_like = L2.by_id AND L2.user_like = L1.by_id WHERE L1.user_like = ?', [myid], (err, result) => {
+			if (err) throw err;
+			cb(result);
+		});
 	}
 
 	static get_match(id, cb)
@@ -19,6 +22,7 @@ class user {
 		//VERIFIER SI CEST DEJA LE DERNIER POUR LE SHOOOOOTER
 		connexion.query('SELECT U.id, U.pseudo, U.isconnected, P.picture, L.date_match FROM users U INNER JOIN likes L ON L.by_id = U.id INNER JOIN pictures P ON L.by_id= P.content_id AND P.pp = 1 WHERE L.user_like = ? ORDER BY L.date_match DESC', [id], (err, rows) =>{
 			if (err) console.log(err);
+			console.log(rows)
 			cb(rows.map((row) => new user (row)));
 		});
 	}
@@ -35,10 +39,24 @@ class user {
 
 	static add_view(myid, idview)
 	{
-		//VERIFIER LE DERNIER A AVOIR CHECK POUR NE PAS SPAAAM
-		connexion.query('INSERT INTO historical SET viewer_id = ?, pageview_id = ?', [myid, idview], (err, result) =>{
-			if (err) console.log(err);
+		connexion.query("SELECT viewer_id FROM historical WHERE pageview_id = ? ORDER BY date_view DESC LIMIT 1;", [idview], function (err, id) {
+			if (err) throw err;
+			var lastview_uid = 0;
+			if (id[0] != null) {
+				lastview_uid = id[0].viewer_id;
+			}
+			if (lastview_uid != myid) {
+				connexion.query('INSERT INTO historical SET viewer_id = ?, pageview_id = ?', [myid, idview], (err, result) =>{
+					if (err) console.log(err);
+				});
+			} 
+			else {
+						// a deja vu
+					}
 		});
+		// connexion.query('INSERT INTO historical SET viewer_id = ?, pageview_id = ?', [myid, idview], (err, result) =>{
+		// 	if (err) console.log(err);
+		// });
 	}
 
 	static connected(id)
