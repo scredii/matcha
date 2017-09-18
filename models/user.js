@@ -9,11 +9,69 @@ moment.locale('fr');
 
 class user {
 
+	static select_date_last_co(myid, cb)
+	{
+		connexion.query('SELECT last_connexion FROM lastconnexion WHERE user_id = ?', [myid], (err, date) =>{
+			if (err) console.log(err);
+			// console.log(date)
+			cb(moment(date[0]));
+		});
+	}
+
+
+	static add_date_last_connexion(myid)
+	{
+		connexion.query('SELECT user_id FROM lastconnexion WHERE user_id = ?', [myid], (err, id) => {
+			if (err) throw err;
+			if (id.length === 0)
+			{
+				connexion.query('INSERT INTO lastconnexion SET user_id = ?', [myid], (err, result) =>{
+					if (err) console.log(err);
+				});
+			}
+			else if (id[0].user_id == myid)
+			{
+				connexion.query('UPDATE lastconnexion SET user_id = ?, last_connexion = CURRENT_TIMESTAMP WHERE user_id = ?', [myid, myid], (err, result) =>{
+					if (err) console.log(err);
+				});
+			}
+			else{
+				
+			}
+			// cb(rows.map((row) => new user (row)));
+		});
+	}
+
+
+	// static get_mutual_match(myid, cb)
+	// {
+	// 	// FUNCTION OK 
+	// 	// SELECT l2.* FROM likes L1 INNER JOIN likes L2 ON L1.user_like = L2.by_id AND L2.user_like = L1.by_id WHERE L2.user_like = 1;
+	// 	connexion.query('SELECT l2.* FROM likes L1 INNER JOIN likes L2 ON L1.user_like = L2.by_id AND L2.user_like = L1.by_id WHERE L2.user_like = ?', [myid], (err, rows) => {
+	// 		if (err) throw err;
+	// 		cb(rows.map((row) => new user (row)));
+	// 	});
+	// }
+
+
 	static get_mutual_match(myid, cb)
 	{
-		connexion.query('SELECT l1.*, u.id, u.pseudo, u.isconnected FROM users U INNER JOIN likes L1 INNER JOIN likes L2 ON L1.user_like = L2.by_id AND L2.user_like = L1.by_id WHERE L2.user_like = ?', [myid], (err, rows) => {
+		// FUNCTION OK 
+		// SELECT l2.* FROM likes L1 INNER JOIN likes L2 ON L1.user_like = L2.by_id AND L2.user_like = L1.by_id WHERE L2.user_like = 1;
+		connexion.query('SELECT U.* ,l2.user_like, l2.date_match FROM users U, likes L1 INNER JOIN likes L2 ON L1.user_like = L2.by_id AND L2.user_like = L1.by_id WHERE L2.by_id = ? AND L1.by_id = U.id OR L1.user_like = ? AND L2.by_id = U.id ORDER BY U.id', [myid, myid], (err, rows) => {
 			if (err) throw err;
 			console.log(rows)
+			cb(rows.map((row) => new user (row)));
+		});
+	}
+
+
+
+	static get_this_match(myid, userid, cb)
+	{
+				connexion.query('SELECT user_like FROM likes WHERE user_like = ? AND by_id = ?', [userid, myid], (err, rows) =>{
+			if (err) console.log(err);
+			// console.log(rows)
 			cb(rows.map((row) => new user (row)));
 		});
 	}
@@ -23,6 +81,7 @@ class user {
 		//VERIFIER SI CEST DEJA LE DERNIER POUR LE SHOOOOOTER
 		connexion.query('SELECT U.id, U.pseudo, U.isconnected, P.picture, L.date_match FROM users U INNER JOIN likes L ON L.by_id = U.id INNER JOIN pictures P ON L.by_id= P.content_id AND P.pp = 1 WHERE L.user_like = ? ORDER BY L.date_match DESC', [id], (err, rows) =>{
 			if (err) console.log(err);
+			// console.log(rows)
 			cb(rows.map((row) => new user (row)));
 		});
 	}
@@ -74,20 +133,32 @@ class user {
 	}
 	static add_match(userliker, byuser, cb)
 	{
-		connexion.query('SELECT count(id) as rep FROM likes WHERE user_like = ? AND by_id = ? LIMIT 1;', [userliker, byuser], (err, result) => {
-			console.log(result)
-			if (result[0].rep !== 1)
+
+		connexion.query('SELECT content_id FROM pictures WHERE content_id = ? LIMIT 1', [byuser], (err, result) => {
+			// console.log(result);
+			if (result.length !== 0)
 			{
-				connexion.query('INSERT INTO likes SET user_like = ?, by_id = ?', [userliker, byuser], (err, result) => {
-					if (err) throw err;
-					cb(result);
-				});
-				return;
+				if (result[0].content_id == byuser)
+				{
+					connexion.query('SELECT count(id) as rep FROM likes WHERE user_like = ? AND by_id = ? LIMIT 1;', [userliker, byuser], (err, result) => {
+						console.log(result)
+						if (result[0].rep !== 1)
+						{
+							connexion.query('INSERT INTO likes SET user_like = ?, by_id = ?', [userliker, byuser], (err, result) => {
+								if (err) throw err;
+								cb(result);
+							});
+							return;
+						}
+						else
+						{
+							cb("already");
+						}
+					});
+				}
 			}
-			else
-			{
-				cb("already");
-			}
+				else
+					cb("add_pic");
 		});
 	}
 
@@ -311,6 +382,15 @@ class user {
 // DB USERS
 	get pseudo (){
 		return this.row.pseudo;
+	}
+	get lastconnexion (){
+		return this.row.lastconnexion;
+	}
+	get last_connexion (){
+		return this.row.last_connexion;
+	}
+	get by_id (){
+		return this.row.by_id;
 	}
 	get user_like (){
 		return this.row.user_like;

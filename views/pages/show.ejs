@@ -24,6 +24,42 @@
 								<% if (  user[0].age !== null ) { %>
 									<span class="date"><%= user[0].age %> ans</span>
 								<% } %>
+
+
+								<% if (  user[0].match_g === "male" && user[0].gender === "male") { %>
+								<br/>
+								<span class="date">Orientation: <i class="gay icon"></i></span>
+								<% } %>
+
+								<% if (  user[0].match_g === "female" && user[0].gender === "male") { %>
+								<br/>
+								<span class="date">Orientation: <i class="heterosexual icon"></i></span>
+								<% } %>
+
+								<% if (  user[0].match_g === "all" && user[0].gender === "male") { %>
+								<br/>
+								<span class="date">Orientation: <i class="intergender icon"></i></span>
+								<% } %>
+
+
+								<% if (  user[0].match_g === "male" && user[0].gender === "female") { %>
+								<br/>
+								<span class="date">Orientation: <i class="heterosexual icon"></i></span>
+								<% } %>
+
+								<% if (  user[0].match_g === "female" && user[0].gender === "female") { %>
+								<br/>
+								<span class="date">Orientation: <i class="lesbian icon"></i></span>
+								<% } %>
+
+								<% if (  user[0].match_g === "all" && user[0].gender === "female") { %>
+								<br/>
+								<span class="date">Orientation: <i class="intergender icon"></i></span>
+								<% } %>
+
+
+
+
 								</div>
 								<div class="ui  clearing divider"></div>
 								<div class="description">
@@ -75,11 +111,34 @@
 			<% } %>
 			<% if (user[0].isconnected == 0) { %>
 			<div class="item">
-				<p><i class="red circle icon"></i>Hors ligne</p>
+				<p><i class="red circle icon"></i>Hors ligne </p>
+			(Derniere co: <%= lastco.fromNow() %>)
 			</div>
 			<% } %>
+			<% if (match[0]) { %>
+			<% if (match[0].user_like == user[0].id) { %>
+			<div class="meta">
+				<p>Vous liké cet utilisateur</p>
+			</div>
+			<% } %>
+			<% } %>
+			<% if (match2[0]) { %>
+			<% if (match2[0].user_like == user[0].myid) { %>
+			<div class="meta">
+				<p>Cet utilisateur vous a liké </p>
+			</div>
+			<% } %>
+			<% } %>
+			<% if (mutual[0]) { %>
+			<% if (mutual[0].user_like == user[0].myid && mutual[0].by_id == user[0].id) { %>
+			<div class="meta">
+				<p>Vous vous liké mutuellement <i class="heart red icon"></i></p>
+				
+			</div>
+			<% } %>
+			<% } %>
 		</div>
-</div>
+		</div>
 						<% if (picture) {  %>
 						<div class="ui medium bordered image ">
 							<div class="ui grid ">

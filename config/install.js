@@ -58,8 +58,14 @@ connexion1.connect(function(err) {
 														{
 															connexion2.query('CREATE TABLE historical (id INT(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, viewer_id INT(16) NOT NULL, pageview_id INT(16) NOT NULL, date_view TIMESTAMP DEFAULT CURRENT_TIMESTAMP)', (err, result) =>{
 															console.log("Table historical created");
-															// connexion2.close();
-															connexion2.end();
+															if (result)
+															{
+																
+																connexion2.query('CREATE TABLE lastconnexion(id int(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, user_id INT(16) NOT NULL, last_connexion timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP)', (err, result) =>{
+																	console.log("Table lastconnexion created");
+																	connexion2.end();
+																});
+															}
 															});
 														}
 													});

@@ -81,7 +81,10 @@ class location{
 	{
 		connexion.query('SELECT locations.latitude, locations.longitude from locations WHERE id_content = ?', [myid], (err, result) => {
 			if (err) throw err;
-			cb(result)
+			if (result)
+				cb(result);
+			else
+				cb(0)
 		});
 	}
 

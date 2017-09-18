@@ -81,6 +81,10 @@ app.get('/', function (req, res) {
 		res.render('pages/index');	
 });
 
+app.get('/librairie', function(req, res){
+		res.render('pages/librairie');
+});
+
 // GESTION DU NOUVEAU MOT DE PASSE
 app.get('/new_pass', function (req, res) {
 		// console.log(req.query);
@@ -113,8 +117,13 @@ app.post('/notif', function(req, res){
 			console.log(result);
 			if (result === "already")
 			{
-				req.flash('success', "Vous avez deja envoyé un match a cette personne");
+				req.flash('error', "Vous avez deja envoyé un match a cette personne");
 				res.redirect('/notif');				
+			}
+			else if (result === "add_pic")
+			{
+				req.flash('error', "Seul les membres avec une photo peuvent liker des utilisateurs");
+				res.redirect('/notif');		
 			}
 			else
 			{
@@ -150,9 +159,21 @@ app.post('/show/:id', function (req, res) {
 		//VEROUILLER LES SQL DU BUTTON		
 		console.log("form match")
 		user.add_match(req.body.userid, req.session.identifiant, function(result){
-			console.log(result);
+			if (result === "already")
+			{
+				req.flash('error', "Vous avez deja envoyé un match a cette personne");
+				res.redirect(req._parsedOriginalUrl.path);
+			}
+			else if (result === "add_pic")
+			{
+				req.flash('error', "Seul les membres avec une photo peuvent liker des utilisateurs");
+				res.redirect(req._parsedOriginalUrl.path);
+			}
+			else
+			{
 			req.flash('success', "Un match vient d'etre envoyé a cet utilisateur");
 			res.redirect(req._parsedOriginalUrl.path);
+			}
 		});
 	}
 });
@@ -166,32 +187,39 @@ app.get('/show/:id', function (req, res) {
 		// user.popplus1(req.params.id);
 		user.add_view(req.session.identifiant, req.params.id);
 	}
-	user.getbyid(req.params.id, function(user){
-		picture.profilpic(req.params.id, function(pp){
-			picture.allwithoutpp(req.params.id, function(picture){
-				hashtag.all(req.params.id, function(hashtag){
-					locate.get_dist(req.session.identifiant, function(dist){
-						if (user[0] && req.session.identifiant)
-						{
-							console.log(user[0])
-							user[0].myid = req.session.identifiant;
-							locate.calcCrow(dist[0].latitude, dist[0].longitude, user[0].latitude, user[0].longitude, function(diff){
-								// console.log(pp);
-								res.render('pages/show', {user: user, picture: picture, pp: pp, hashtag: hashtag, diff: diff});
+	user.select_date_last_co(req.params.id, function(lastco){
+		user.get_this_match(req.session.identifiant, req.params.id,  function(match){
+			user.get_this_match(req.params.id, req.session.identifiant, function(match2){
+				user.get_mutual_match(req.session.identifiant, function(mutual){
+					user.getbyid(req.params.id, function(user){
+						picture.profilpic(req.params.id, function(pp){
+							picture.allwithoutpp(req.params.id, function(picture){
+								hashtag.all(req.params.id, function(hashtag){
+									locate.get_dist(req.session.identifiant, function(dist){
+										if (user[0] && req.session.identifiant)
+										{
+											console.log(lastco)
+											user[0].myid = req.session.identifiant;
+											//probleme de distance quand pas de loc
+											locate.calcCrow(dist[0].latitude, dist[0].longitude, user[0].latitude, user[0].longitude, function(diff){
+												// console.log(pp);
+												res.render('pages/show', {user: user, picture: picture, pp: pp, hashtag: hashtag, diff: diff, mutual: mutual, match: match, match2: match2, lastco: lastco});
+											});
+										}
+										else
+										{
+											// res.render('pages/index', {user: user, picture: picture, pp: pp, hashtag: hashtag});
+											res.redirect('/');
+										}
+									});
+								});
 							});
-						}
-						else
-						{
-							// res.render('pages/index', {user: user, picture: picture, pp: pp, hashtag: hashtag});
-							res.redirect('/');
-						}
+						});
 					});
 				});
 			});
 		});
 	});
-
-		// res.render('pages/new_pass');	
 });
 
 app.post('/new_pass', function (req, res, next) {
@@ -247,8 +275,12 @@ app.get('/profile', function (req, res, next) {
 //delogue
 app.get('/logout', function (req, res, next) {
 		let user = require('./models/user')
-		user.disconnect(req.session.identifiant);
-		delete req.session.authenticated;
+		if (req.session && req.session.identifiant)
+		{
+			user.add_date_last_connexion(req.session.identifiant);
+			user.disconnect(req.session.identifiant);
+			delete req.session.authenticated;
+		}
 		res.redirect('/');
 	});
 
