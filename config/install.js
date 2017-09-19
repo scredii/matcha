@@ -27,7 +27,7 @@ connexion1.connect(function(err) {
 			connexion2.connect(function(err) {
 				if (err) throw err;
 				console.log("Connected to DB matcha !");
-				connexion2.query('CREATE TABLE users (id INT(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, pseudo VARCHAR(255) NOT NULL, name VARCHAR(255) NOT NULL, lastname VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, gender VARCHAR(255) NULL, match_g VARCHAR(255) NULL, bio VARCHAR(255) NULL, token VARCHAR(255) NOT NULL, age INT(2) NULL, pop INT(255) DEFAULT 0, isconnected int(255) DEFAULT 0)', (err, result) => {
+				connexion2.query('CREATE TABLE users (id INT(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, pseudo VARCHAR(255) NOT NULL, name VARCHAR(255) NOT NULL, lastname VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, gender VARCHAR(255) NULL, match_g VARCHAR(255) NULL, bio VARCHAR(255) NULL, token VARCHAR(255) NOT NULL, age INT(2) NULL, isconnected int(255) DEFAULT 0)', (err, result) => {
 					if (err) throw err;
 					console.log("Table user created");
 				if (result)
@@ -63,7 +63,13 @@ connexion1.connect(function(err) {
 																
 																connexion2.query('CREATE TABLE lastconnexion(id int(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, user_id INT(16) NOT NULL, last_connexion timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP)', (err, result) =>{
 																	console.log("Table lastconnexion created");
-																	connexion2.end();
+																	if (result)
+																	{
+																		connexion2.query('CREATE TABLE pop(id INT(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, user_like INT(16) NOT NULL, by_id INT(16), date_pop TIMESTAMP DEFAULT CURRENT_TIMESTAMP)', (err, result) =>{
+																			console.log("Table pop created");
+																			connexion2.end();
+																		});
+																	}
 																});
 															}
 															});

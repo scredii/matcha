@@ -64,6 +64,12 @@
 								<div class="ui  clearing divider"></div>
 								<div class="description">
 									<%= user[0].bio %>
+							<% if (  pop[0] ) { %>
+							<br/>
+									<strong>Popularité: <%= pop[0].count %></strong>
+
+							<% } %>
+
 								</div>
 							</div>
 							<% if (  user[0].city ) { %>
@@ -139,17 +145,17 @@
 			<% } %>
 		</div>
 		</div>
-						<% if (picture) {  %>
-						<div class="ui medium bordered image ">
-							<div class="ui grid ">
-							<% for (picture of picture) { %>
-							<!--<div class="four wide column">-->
-								<div class="ui tiny images">
-									<img class="ui image" src="/assets/images/user_image/<%= picture.picture %>">
-								</div>
-							<% } %>
-						</div>
+					<% if (picture) {  %>
+					<div class="ui medium bordered image ">
+						<div class="ui grid ">
+						<% for (picture of picture) { %>
+						<!--<div class="four wide column">-->
+							<div class="ui tiny images">
+								<img class="ui image" src="/assets/images/user_image/<%= picture.picture %>">
+							</div>
+						<% } %>
 					</div>
+				</div>
 			</div>
 			<% } %>
 			</div>

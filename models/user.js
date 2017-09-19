@@ -9,6 +9,15 @@ moment.locale('fr');
 
 class user {
 
+	static get_pop(id, cb)
+	{
+		connexion.query('SELECT COUNT(user_like) as count FROM pop WHERE user_like = ?', [id], (err, count) =>{
+			if (err) console.log(err);
+			console.log( count)
+			cb(count);
+		});
+	}
+
 	static select_date_last_co(myid, cb)
 	{
 		connexion.query('SELECT last_connexion FROM lastconnexion WHERE user_id = ?', [myid], (err, date) =>{
@@ -60,7 +69,7 @@ class user {
 		// SELECT l2.* FROM likes L1 INNER JOIN likes L2 ON L1.user_like = L2.by_id AND L2.user_like = L1.by_id WHERE L2.user_like = 1;
 		connexion.query('SELECT U.* ,l2.user_like, l2.date_match FROM users U, likes L1 INNER JOIN likes L2 ON L1.user_like = L2.by_id AND L2.user_like = L1.by_id WHERE L2.by_id = ? AND L1.by_id = U.id OR L1.user_like = ? AND L2.by_id = U.id ORDER BY U.id', [myid, myid], (err, rows) => {
 			if (err) throw err;
-			console.log(rows)
+			// console.log(rows)
 			cb(rows.map((row) => new user (row)));
 		});
 	}
@@ -85,6 +94,17 @@ class user {
 			cb(rows.map((row) => new user (row)));
 		});
 	}
+
+	static get_my_match(id, cb)
+	{
+		//VERIFIER SI CEST DEJA LE DERNIER POUR LE SHOOOOOTER
+		connexion.query('SELECT U.id, U.pseudo, U.isconnected, P.picture, L.date_match FROM users U INNER JOIN likes L ON L.user_like = U.id INNER JOIN pictures P ON L.user_like = P.content_id AND P.pp = 1 WHERE L.by_id = ? ORDER BY L.date_match DESC', [id], (err, rows) =>{
+			if (err) console.log(err);
+			// console.log(rows)
+			cb(rows.map((row) => new user (row)));
+		});
+	}
+
 
 	static get_visite(id, cb)
 	{
@@ -141,10 +161,11 @@ class user {
 				if (result[0].content_id == byuser)
 				{
 					connexion.query('SELECT count(id) as rep FROM likes WHERE user_like = ? AND by_id = ? LIMIT 1;', [userliker, byuser], (err, result) => {
-						console.log(result)
+						// console.log(result)
 						if (result[0].rep !== 1)
 						{
 							connexion.query('INSERT INTO likes SET user_like = ?, by_id = ?', [userliker, byuser], (err, result) => {
+								user.popplus(byuser, userliker);
 								if (err) throw err;
 								cb(result);
 							});
@@ -161,6 +182,26 @@ class user {
 					cb("add_pic");
 		});
 	}
+
+	static del_match(myid, user_id, cb)
+	{
+		connexion.query('SELECT * from likes WHERE user_like = ? AND by_id = ?', [user_id, myid], (err, result) =>{
+			if (err) console.log(err);
+			console.log(result)
+			if (result.length === 0)
+			{
+				cb(-1);
+			}
+			else
+			{
+				connexion.query('DELETE FROM likes WHERE user_like = ? AND by_id = ?', [user_id, myid], (err, result) => {
+					if (err) throw err;
+					cb(1);
+				});
+			}
+		});
+	}
+
 
 	static check_block(myid, cb)
 	{
@@ -195,10 +236,10 @@ class user {
 		});
 	}
 
-	static popplus1(id)
+	static popplus1(myid, userid)
 	{
 		//SECURISE PAR LA SESSION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		connexion.query('SELECT count(id) as rep FROM users WHERE id = ? LIMIT 1;', [id], (err, result) => {
+		connexion.query('SELECT count(id) as rep FROM users WHERE id = ? LIMIT 1;', [myid], (err, result) => {
 			// console.log(result[0].rep)
 			if (result[0].rep !== 1)
 			{
@@ -208,14 +249,43 @@ class user {
 			else
 			{
 				console.log('bon ok je vais dans la db');
-				connexion.query('UPDATE users SET pop = pop + 1 WHERE id = ?', [id], (err, result) => {
-
+				connexion.query("SELECT by_id FROM pop WHERE user_like = ? ORDER BY date_pop DESC LIMIT 1;", [userid], function (err, id) {
+					if (err) throw err;
+					var lastview_uid = 0;
+					if (id[0] != null) {
+						lastview_uid = id[0].by_id;
+					}
+					if (lastview_uid != myid) {
+						connexion.query('INSERT INTO pop SET user_like = ?, by_id = ?', [userid, myid], (err, result) =>{
+							if (err) console.log(err);
+						});
+					} 
+					else {
+								// a deja vu
+							}
 				});
 			}
 		});
-		// connexion.query('UPDATE users SET populaire = populaire + 1 WHERE id = ?', [id], (err) =>{
-		// 	if (err) throw err;
-		// });
+	}
+
+	static popplus(myid, userid)
+	{
+		//SECURISE PAR LA SESSION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		connexion.query('SELECT count(id) as rep FROM users WHERE id = ? LIMIT 1;', [myid], (err, result) => {
+			// console.log(result[0].rep)
+			if (result[0].rep !== 1)
+			{
+				console.log('pas de compte je me casse');
+				return;
+			}
+			else
+			{
+				console.log('bon ok je vais dans la db');
+						connexion.query('INSERT INTO pop SET user_like = ?, by_id = ?', [userid, myid], (err, result) =>{
+							if (err) console.log(err);
+				});
+			}
+		});
 	}
 
 	static maj_password(user_infos, cb)
@@ -364,8 +434,18 @@ class user {
 			// cb(result);
 			cb(rows.map((row) => new user (row)));
 		});
-
 	}
+
+	// static suggest(cb)
+	// {
+	// 	connexion.query('SELECT U.*, L.city, L.latitude, L.longitude, P.picture, H.hashtag FROM users U INNER JOIN locations L ON U.id = L.id_content LEFT JOIN pictures P ON U.id = P.content_id AND P.pp = 1 LEFT JOIN hashtag H ON U.id = H.content_id WHERE NOT EXISTS (SELECT * FROM block B WHERE U.id = B.user_blocked) ORDER BY U.id', (err, rows) =>{
+	// 		if (err) throw err;
+	// 		// console.log(rows)
+	// 		// cb(result);
+	// 		cb(rows.map((row) => new user (row)));
+	// 	});
+	// }
+
 	static all_hashtag(cb)
 	{
 		connexion.query('SELECT hashtag, content_id FROM hashtag GROUP BY content_id', (err, rows) =>{

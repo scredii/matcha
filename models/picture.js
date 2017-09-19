@@ -52,7 +52,7 @@ class picture {
 									}
 									else
 									{
-										connexion.query('INSERT INTO pictures SET picture = ?, content_id = ?', [id_picture, identifiant], (err) => {
+										connexion.query('INSERT INTO pictures SET picture = ?, content_id = ?, pp = 0', [id_picture, identifiant], (err) => {
 											if (err) throw err;
 										});
 										cb(true);

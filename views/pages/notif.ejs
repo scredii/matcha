@@ -32,7 +32,7 @@
 		</div>
 		<% } %>
 		<div class="ui section divider"></div>
-		<h3 class="ui header">Vos Match: </h3>
+		<h3 class="ui header">Ces personnes vous ont envoyé un Match: </h3>
 		<% if (match) { %>
 		<div class="ui grid">
 		<% for (match of match){ %>
@@ -75,8 +75,52 @@
 	</div>
 	<% } %>
 	</div>
+	<% } %>		
+	<div class="ui section divider"></div>
+		<h3 class="ui header">Vous avez envoyé un match a ces personnes: </h3>
+				<% if (mymatch) { %>
+			<div class="ui cards">
+				
+			<% for (mymatch of mymatch) { %>
+			<% if (mymatch.id !== myid) { %>
+				<div class="card">
+					<div class="content">
+					<div class="header">
+					<a href="/show/<%= mymatch.id %>"> <%= mymatch.pseudo %> </a>
+					</div>
+					<div class="meta">
+						<% if (mymatch.isconnected == 1) { %>
+							<div class="item">
+								<p><i class="green circle icon"></i>En ligne</p>
+							</div>
+						<% } %>
+						<% if (mymatch.isconnected == 0) { %>
+							<div class="item">
+								<p><i class="red circle icon"></i>Hors ligne</p>
+							</div>
+						<% } %>
+					</div>
+					<div class="meta">
+						<a><%= mymatch.date_match.fromNow() %></a>
+					</div>
+					</div>
+					<div class="extra content">
+					<div class="ui two buttons">
+						<form method="post">
+							<input type="hidden" type="text" name="userid" value="<%= mymatch.id %>" >
+							<button value="unmatch" name="form" type="submit" class="ui blue inverted  labeled submit icon button">
+								<i class="remove circle icon"></i> Supprimer Match!
+							</button>
+						</form>
+					</div>
+					</div>
+				</div>
+			<% } %>
+			<% } %>
+			</div>
 	<% } %>
 		<div class="ui section divider"></div>
+	
 		<h3 class="ui header">Match mutuelle: </h3>
 		<% if (mutual) { %>
 			<div class="ui cards">
@@ -105,14 +149,15 @@
 					</div>
 					</div>
 					<div class="extra content">
-					<div class="ui two buttons">
-						<div class="ui basic green button">Approve</div>
-						<div class="ui basic red button">Decline</div>
-					</div>
+							<a href="/message"><button value="unmatch" name="form" type="submit" class="ui blue inverted  labeled submit icon button">
+								<i class="comments icon"></i> Commencer la conversation
+							</button></a>
 					</div>
 				</div>
 			<% } %>
 			<% } %>
 			</div>
 	<% } %>
+		<div class="ui section divider"></div>
+	
 <% include footer %>

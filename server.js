@@ -12,6 +12,9 @@ let fileUpload = require('express-fileupload');
 var bool = "";
 let helmet = require('helmet');
 let axios = require('axios');
+let fs = require('fs');
+let connexion = require('./config/setup');
+let mysql = require('mysql');
 // Moteur de template
 
 app.set('view engine', 'ejs');
@@ -64,6 +67,113 @@ app.use(require('./middlewares/flash'));
 // Routes
 
 //Index
+
+app.get('/message', function (req, res) {
+		res.render('pages/message');	
+});
+
+
+
+
+
+
+
+// Let’s make node/socketio listen on port 3000
+var io = require('socket.io').listen(3000)
+// Define our db creds
+var db = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    database: 'matcha',
+	port: 3000
+})
+
+// Log any errors connected to the db
+// connexion.connect(function(err){
+//     if (err) console.log(err)
+// })
+ 
+// Define/initialize our global vars
+var notes = []
+var isInitNotes = false
+var socketCount = 0
+ 
+io.sockets.on('connection', function(socket){
+    // Socket has connected, increase socket count
+    socketCount++
+    // Let all sockets know how many are connected
+    io.sockets.emit('users connected', socketCount)
+ 
+    socket.on('disconnect', function() {
+        // Decrease the socket count on a disconnect, emit
+        socketCount--
+        io.sockets.emit('users connected', socketCount)
+    })
+ 
+    socket.on('new note', function(data){
+        // New note added, push to all sockets and insert into db
+        notes.push(data)
+        io.sockets.emit('new note', data)
+        // Use node's db injection format to filter incoming data
+        db.query('INSERT INTO notes SET note = ?', [data.note], (err, result)=>{
+			if (err) throw err;
+			if (result) console.log(err);
+    });
+    });
+ 
+    // Check to see if initial query/notes are set
+    if (! isInitNotes) {
+        // Initial app start, run db query
+        db.query('SELECT * FROM notes')
+            .on('result', function(data){
+                // Push results onto the notes array
+                notes.push(data)
+            })
+            .on('end', function(){
+                // Only emit notes after query has been completed
+                socket.emit('initial notes', notes)
+            })
+ 
+        isInitNotes = true
+    } else {
+        // Initial notes already exist, send out
+        socket.emit('initial notes', notes)
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 app.post('/del_tag', function (req, res, next){
 	let hashtag = require('./models/hashtag');
 	hashtag.del_tag(req.body.hashtag, req.body.id, req.session.identifiant ,function(){
@@ -97,12 +207,14 @@ app.get('/notif', function(req, res){
 	let user = require('./models/user');
 	user.get_visite(req.session.identifiant, function(visite){
 		user.get_match(req.session.identifiant,function(match){
-			user.get_mutual_match(req.session.identifiant, function(mutual){
-				var myid = req.session.identifiant;
-			res.render('pages/notif', {visite: visite, match: match, mutual: mutual, myid: myid});
+			user.get_my_match(req.session.identifiant, function(mymatch){
+				user.get_mutual_match(req.session.identifiant, function(mutual){
+					var myid = req.session.identifiant;
+					console.log(mymatch)
+				res.render('pages/notif', {visite: visite, match: match, mutual: mutual, myid: myid, mymatch: mymatch});
+				});
 			});
 		});
-	// console.log(visite)
 	});
 });
 
@@ -131,6 +243,42 @@ app.post('/notif', function(req, res){
 			res.redirect('/notif');
 			}
 		});
+	}
+	if (req.body.form === "unmatch")
+	{
+		// VEROUILLER LES SQL DU BUTTON		
+		console.log("form unmatch")
+		user.del_match(req.session.identifiant, req.body.userid, function(bool){
+			console.log(bool)
+			if (bool === -1)
+			{
+				req.flash('error', "Aucun match trouvé avec cet utilisateur");
+				res.redirect('/notif');
+			}
+			else if (bool === 1)
+			{
+				req.flash('success', "Match supprimé");
+				res.redirect('/notif');
+			}
+		});
+		// user.add_match(req.body.userid, req.session.identifiant, function(result){
+		// 	console.log(result);
+		// 	if (result === "already")
+		// 	{
+		// 		req.flash('error', "Vous avez deja envoyé un match a cette personne");
+		// 		res.redirect('/notif');				
+		// 	}
+		// 	else if (result === "add_pic")
+		// 	{
+		// 		req.flash('error', "Seul les membres avec une photo peuvent liker des utilisateurs");
+		// 		res.redirect('/notif');		
+		// 	}
+		// 	else
+		// 	{
+		// 	req.flash('success', "Un match vient d'etre envoyé a cet utilisateur");
+		// 	res.redirect('/notif');
+		// 	}
+		// });
 	}
 });
 
@@ -182,35 +330,37 @@ app.get('/show/:id', function (req, res) {
 	let picture = require('./models/picture');
 	let hashtag = require('./models/hashtag');
 	let locate = require('./models/locate');
-
 	if (req.session.identifiant && (req.params.id != req.session.identifiant)){
 		// user.popplus1(req.params.id);
 		user.add_view(req.session.identifiant, req.params.id);
+		user.popplus1(req.session.identifiant, req.params.id);
 	}
 	user.select_date_last_co(req.params.id, function(lastco){
 		user.get_this_match(req.session.identifiant, req.params.id,  function(match){
-			user.get_this_match(req.params.id, req.session.identifiant, function(match2){
-				user.get_mutual_match(req.session.identifiant, function(mutual){
-					user.getbyid(req.params.id, function(user){
-						picture.profilpic(req.params.id, function(pp){
-							picture.allwithoutpp(req.params.id, function(picture){
-								hashtag.all(req.params.id, function(hashtag){
-									locate.get_dist(req.session.identifiant, function(dist){
-										if (user[0] && req.session.identifiant)
-										{
-											console.log(lastco)
-											user[0].myid = req.session.identifiant;
-											//probleme de distance quand pas de loc
-											locate.calcCrow(dist[0].latitude, dist[0].longitude, user[0].latitude, user[0].longitude, function(diff){
-												// console.log(pp);
-												res.render('pages/show', {user: user, picture: picture, pp: pp, hashtag: hashtag, diff: diff, mutual: mutual, match: match, match2: match2, lastco: lastco});
-											});
-										}
-										else
-										{
-											// res.render('pages/index', {user: user, picture: picture, pp: pp, hashtag: hashtag});
-											res.redirect('/');
-										}
+			user.get_pop(req.params.id, function(pop){
+				user.get_this_match(req.params.id, req.session.identifiant, function(match2){
+					user.get_mutual_match(req.session.identifiant, function(mutual){
+						user.getbyid(req.params.id, function(user){
+							picture.profilpic(req.params.id, function(pp){
+								picture.allwithoutpp(req.params.id, function(picture){
+									hashtag.all(req.params.id, function(hashtag){
+										locate.get_dist(req.session.identifiant, function(dist){
+											if (user[0] && req.session.identifiant)
+											{
+												console.log(lastco)
+												user[0].myid = req.session.identifiant;
+												//probleme de distance quand pas de loc
+												locate.calcCrow(dist[0].latitude, dist[0].longitude, user[0].latitude, user[0].longitude, function(diff){
+													console.log(picture);
+													res.render('pages/show', {user: user, picture: picture, pp: pp, hashtag: hashtag, diff: diff, mutual: mutual, match: match, match2: match2, lastco: lastco, pop: pop});
+												});
+											}
+											else
+											{
+												// res.render('pages/index', {user: user, picture: picture, pp: pp, hashtag: hashtag});
+												res.redirect('/');
+											}
+										});
 									});
 								});
 							});
