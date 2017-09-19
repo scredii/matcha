@@ -15,7 +15,7 @@ let connexion2 = mysql.createConnection({
   password: "",
   port: 3307
 });
-
+//CREATE TABLE notif(id INT(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, user_id INT(16) NOT NULL, isread INT(16) NOT NULL); TABLE NOTIF
 connexion1.connect(function(err) {
   if (err) throw err;
   console.log("Connected!");

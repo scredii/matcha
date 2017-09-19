@@ -9,6 +9,21 @@ moment.locale('fr');
 
 class user {
 
+	static add_notif(id)
+	{
+		//proteger contre les injections
+		connexion.query('INSERT INTO notif SET user_id = ?, isread = 0', [id], (err, result) =>{
+			if (err) console.log(err);
+		});
+	}
+
+	static reset_notif(id)
+	{
+		connexion.query('UPDATE notif SET isread = 1 WHERE user_id = ? ', [id], (err, count) =>{
+			if (err) console.log(err);
+		});
+	}
+
 	static get_pop(id, cb)
 	{
 		connexion.query('SELECT COUNT(user_like) as count FROM pop WHERE user_like = ?', [id], (err, count) =>{
@@ -127,6 +142,12 @@ class user {
 			if (lastview_uid != myid) {
 				connexion.query('INSERT INTO historical SET viewer_id = ?, pageview_id = ?', [myid, idview], (err, result) =>{
 					if (err) console.log(err);
+					if (result)
+					{
+						connexion.query('INSERT INTO notif SET user_id = ?, isread = 0', [idview], (err, result) =>{
+							if (err) console.log(err);
+						});
+					}
 				});
 			} 
 			else {
@@ -164,6 +185,9 @@ class user {
 						// console.log(result)
 						if (result[0].rep !== 1)
 						{
+							connexion.query('INSERT INTO notif SET user_id = ?, isread = 0', [userliker], (err, result) =>{
+								if (err) console.log(err);
+							});
 							connexion.query('INSERT INTO likes SET user_like = ?, by_id = ?', [userliker, byuser], (err, result) => {
 								user.popplus(byuser, userliker);
 								if (err) throw err;

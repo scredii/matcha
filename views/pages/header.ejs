@@ -4,6 +4,16 @@
 	<meta charset="utf-8">
 	<title>First Page</title>
 	<link rel="stylesheet" href="/assets/semantic/dist/semantic.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script type="text/javascript">
+	function get_notif()
+	{
+		$.getJSON("/notif/api", function (data) {
+			console.log(data)
+		});
+	}
+			setInterval(get_notif, 3000);
+	</script>
 	<style>
 		/*.ui.card
 		{
