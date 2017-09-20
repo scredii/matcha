@@ -15,7 +15,10 @@ let connexion2 = mysql.createConnection({
   password: "",
   port: 3307
 });
+//CREATE TABLE message(id_author INT(16) NOT NULL, message TEXT, user_id INT(16) NOT NULL, date_message TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
 //CREATE TABLE notif(id INT(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, user_id INT(16) NOT NULL, isread INT(16) NOT NULL); TABLE NOTIF
+// CREATE TABLE mutual_match(id INT(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, user1 INT(16) NOT NULL, user2 INT(16) NOT NULL)
+// CREATE TABLE notification(id INT(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, user_id INT(16) NOT NULL, content VARCHAR(255) NOT NULL, by_pseudo VARCHAR(255) NOT NULL, by_id INT(16) NOT NULL, isread INT(16) NOT NULL)
 connexion1.connect(function(err) {
   if (err) throw err;
   console.log("Connected!");
@@ -67,7 +70,14 @@ connexion1.connect(function(err) {
 																	{
 																		connexion2.query('CREATE TABLE pop(id INT(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, user_like INT(16) NOT NULL, by_id INT(16), date_pop TIMESTAMP DEFAULT CURRENT_TIMESTAMP)', (err, result) =>{
 																			console.log("Table pop created");
-																			connexion2.end();
+																			if (result)
+																			{
+																				connexion2.query('CREATE TABLE notif(id INT(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, user_id INT(16) NOT NULL, isread INT(16) NOT NULL)', (err, result) =>{
+																					console.log("Table notif created");
+																					connexion2.end();
+																				});
+																				
+																			}
 																		});
 																	}
 																});

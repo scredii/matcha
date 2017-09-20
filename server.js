@@ -49,7 +49,7 @@ app.use(function checkAuth (req, res, next) {
 	if (req.url === '/profile' && (!req.session || !req.session.authenticated) ||
 			req.url === '/galerie' && (!req.session || !req.session.authenticated)||
 				req.url === '/show/:id' && (!req.session || !req.session.authenticated) ||
-					req.url === '/notif' && (!req.session || !req.session.authenticated)) {
+					req.url === '/notification' && (!req.session || !req.session.authenticated)) {
 		res.render('./pages/unauthorised', { status: 403 });
 		return;
 	}
@@ -68,9 +68,40 @@ app.use(require('./middlewares/flash'));
 
 //Index
 
-app.get('/message', function (req, res) {
-		res.render('pages/message');	
+app.get('/message/:id', function (req, res) {
+		let user = require('./models/user');
+		console.log("here")
+		console.log(req.params)
+		user.get_message(req.session.identifiant, req.params.id, function(message){
+
+			if (message === -1)
+			{
+				res.redirect('/');
+			}
+			else
+			{
+				res.render('pages/message', {message: message});
+			}
+		})
 });
+
+app.get('/match', function (req, res, next) {
+	let user = require('./models/user');
+	user.get_mutual_match(req.session.identifiant, function(match){
+		var myid = req.session.identifiant;
+		res.render('pages/match', {match: match, myid: myid});
+	});
+});
+
+app.get('/notification', function (req, res) {
+	let user = require('./models/user');
+	user.get_all_notif(req.session.identifiant, (notif) =>{
+		console.log(notif)
+		res.render('pages/notification', {notif: notif});
+		user.reset_notif(req.session.identifiant)	
+	});
+});
+
 
 app.post('/del_tag', function (req, res, next){
 	let hashtag = require('./models/hashtag');
@@ -90,10 +121,12 @@ app.get('/', function (req, res) {
 });
 
 app.get('/notif/api', function(req, res){
-		connexion.query('SELECT COUNT(user_id) as count FROM notif WHERE isread = 0 AND user_id = ?', [req.session.identifiant], (err, result) =>{
+		connexion.query('SELECT COUNT(user_id) as count FROM notification WHERE isread = 0 AND user_id = ?', [req.session.identifiant], (err, result) =>{
 			console.log(result)
 			res.setHeader('Content-Type', 'application/json');
-			res.send(JSON.stringify({"unread": result[0].count}));
+			if (result){
+				res.send(JSON.stringify({"unread": result[0].count}));
+			}
 		});
 });
 
@@ -103,87 +136,6 @@ app.get('/new_pass', function (req, res) {
 		res.locals.token = req.query.key;
 		res.locals.email = req.query.email;
 		res.render('pages/new_pass');
-});
-
-app.get('/notif', function(req, res){
-	let user = require('./models/user');
-	user.get_visite(req.session.identifiant, function(visite){
-		user.get_match(req.session.identifiant,function(match){
-			user.get_my_match(req.session.identifiant, function(mymatch){
-				user.get_mutual_match(req.session.identifiant, function(mutual){
-					var myid = req.session.identifiant;
-					// console.log(mymatch)
-					user.reset_notif(req.session.identifiant);
-				res.render('pages/notif', {visite: visite, match: match, mutual: mutual, myid: myid, mymatch: mymatch});
-				});
-			});
-		});
-	});
-});
-
-app.post('/notif', function(req, res){
-	let user = require('./models/user');
-	console.log(req.body)
-	if (req.body.form === "match")
-	{
-		// VEROUILLER LES SQL DU BUTTON		
-		console.log("form match")
-		user.add_match(req.body.userid, req.session.identifiant, function(result){
-			console.log(result);
-			if (result === "already")
-			{
-				req.flash('error', "Vous avez deja envoyé un match a cette personne");
-				res.redirect('/notif');				
-			}
-			else if (result === "add_pic")
-			{
-				req.flash('error', "Seul les membres avec une photo peuvent liker des utilisateurs");
-				res.redirect('/notif');		
-			}
-			else
-			{
-				user.add_notif(req.body.userid);
-				req.flash('success', "Un match vient d'etre envoyé a cet utilisateur");
-				res.redirect('/notif');
-			}
-		});
-	}
-	if (req.body.form === "unmatch")
-	{
-		// VEROUILLER LES SQL DU BUTTON		
-		console.log("form unmatch")
-		user.del_match(req.session.identifiant, req.body.userid, function(bool){
-			console.log(bool)
-			if (bool === -1)
-			{
-				req.flash('error', "Aucun match trouvé avec cet utilisateur");
-				res.redirect('/notif');
-			}
-			else if (bool === 1)
-			{
-				req.flash('success', "Match supprimé");
-				res.redirect('/notif');
-			}
-		});
-		// user.add_match(req.body.userid, req.session.identifiant, function(result){
-		// 	console.log(result);
-		// 	if (result === "already")
-		// 	{
-		// 		req.flash('error', "Vous avez deja envoyé un match a cette personne");
-		// 		res.redirect('/notif');				
-		// 	}
-		// 	else if (result === "add_pic")
-		// 	{
-		// 		req.flash('error', "Seul les membres avec une photo peuvent liker des utilisateurs");
-		// 		res.redirect('/notif');		
-		// 	}
-		// 	else
-		// 	{
-		// 	req.flash('success', "Un match vient d'etre envoyé a cet utilisateur");
-		// 	res.redirect('/notif');
-		// 	}
-		// });
-	}
 });
 
 app.post('/show/:id', function (req, res) {
@@ -210,7 +162,7 @@ app.post('/show/:id', function (req, res) {
 	{
 		//VEROUILLER LES SQL DU BUTTON		
 		console.log("form match")
-		user.add_match(req.body.userid, req.session.identifiant, function(result){
+		user.add_match(req.body.userid, req.session.identifiant, req.session.pseudo, function(result){
 			if (result === "already")
 			{
 				req.flash('error', "Vous avez deja envoyé un match a cette personne");
@@ -228,14 +180,34 @@ app.post('/show/:id', function (req, res) {
 			}
 		});
 	}
+	if (req.body.form === "unmatch")
+	{
+		// VEROUILLER LES SQL DU BUTTON		
+		console.log("form unmatch")
+		user.del_match(req.session.identifiant, req.body.userid, req.session.pseudo, function(bool){
+			console.log(bool)
+			if (bool === -1)
+			{
+				req.flash('error', "Aucun match trouvé avec cet utilisateur");
+				res.redirect(req._parsedOriginalUrl.path);
+			}
+			else if (bool === 1)
+			{
+				req.flash('success', "Match supprimé");
+				res.redirect(req._parsedOriginalUrl.path);
+			}
+		});
+	}
 });
 app.get('/show/:id', function (req, res) {
 	let user = require('./models/user');
 	let picture = require('./models/picture');
 	let hashtag = require('./models/hashtag');
 	let locate = require('./models/locate');
+	console.log(req.session)
 	if (req.session.identifiant && (req.params.id != req.session.identifiant)){
 		// user.popplus1(req.params.id);
+		user.add_notification_view(req.params.id, req.session.identifiant, req.session.pseudo)
 		user.add_view(req.session.identifiant, req.params.id);
 		user.popplus1(req.session.identifiant, req.params.id);
 	}
@@ -249,9 +221,9 @@ app.get('/show/:id', function (req, res) {
 								picture.allwithoutpp(req.params.id, function(picture){
 									hashtag.all(req.params.id, function(hashtag){
 										locate.get_dist(req.session.identifiant, function(dist){
-											if (user[0] && req.session.identifiant)
+											if (user[0] && req.session.identifiant && dist[0])
 											{
-												console.log(lastco)
+												console.log(mutual)
 												user[0].myid = req.session.identifiant;
 												//probleme de distance quand pas de loc
 												locate.calcCrow(dist[0].latitude, dist[0].longitude, user[0].latitude, user[0].longitude, function(diff){
@@ -262,6 +234,7 @@ app.get('/show/:id', function (req, res) {
 											else
 											{
 												// res.render('pages/index', {user: user, picture: picture, pp: pp, hashtag: hashtag});
+												req.flash('error', "Vous ne pouvez pas consulter de profil si nous n'avons pas votre locatisation !")
 												res.redirect('/');
 											}
 										});

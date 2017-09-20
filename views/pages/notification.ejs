@@ -1,0 +1,25 @@
+<% include header %>
+<% if (notif) { %>
+<div class="ui list">
+<% for (notif of notif) { %>
+
+  <div class="item">
+    <div class="content">
+      <div class="description">
+      <a class="header" href="/show/<%= notif.by_id %>" >
+        <% if (notif.isread == 0) { %>
+      <i class="red circle icon"></i>
+        <% }%>
+      <%= notif.by_pseudo %></a>
+      <%= notif.content %>  <%= notif.date_action.fromNow() %>.</div>
+    </div>
+  </div>
+
+<% }%>
+</div>
+<% }%>
+
+<% if (!notif) { %>
+<p> Aucune notification</p>
+<% }%>
+<% include footer %>

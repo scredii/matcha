@@ -10,9 +10,10 @@
 	{
 		$.getJSON("/notif/api", function (data) {
 			console.log(data)
+			$('#notif').text(data.unread);
 		});
 	}
-			setInterval(get_notif, 3000);
+			setInterval(get_notif, 8500);
 	</script>
 	<style>
 		/*.ui.card
@@ -52,6 +53,10 @@
 		{
 			padding-top: 10px;
 		}
+				#notif
+		{
+			margin-top: 15px !important;
+		}
 	</style>
 </head>
 <header>
@@ -60,7 +65,8 @@
 	<a href="/" class="header item">Accueil</a>
 	<a href="/logout" class="header item">Logout</a>
 	<a href="/galerie" class="header item">Galerie</a>
-	<a href="/notif" class="header item">Notification</a>
+	<a href="/notification" class="header item">Notification <div id="notif" class="floating ui red label">0</div></a>
+	<a href="/match" class="header item">Mes match!</a>
 </div>
 </header>
 <body>

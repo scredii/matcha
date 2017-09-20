@@ -1,3 +1,32 @@
 <% include header %>
+	<div class="ui segment">
+	<div class="ui horizontal divider">Messagerie</div>
 
+        <div class="ui minimal comments">
+        <% if (message) { %>
+        <% for (message of message) {%>
+        <div class="comment">
+            <div class="content">
+            <a class="author"><%= message.id_author %></a>
+            <div class="metadata">
+                <span class="date"><%= message.date_message.fromNow() %></span>
+            </div>
+            <div class="text">
+                <%= message.message %>
+            </div>
+            </div>
+        </div>
+        <% } %>
+        <% } %>
+
+        <form class="ui reply form">
+            <div class="field">
+            <textarea></textarea>
+            </div>
+            <div class="ui blue labeled submit icon button">
+            <i class="icon edit"></i> Add Reply
+            </div>
+        </form>
+        </div>
+	</div>
 <% include footer %>
