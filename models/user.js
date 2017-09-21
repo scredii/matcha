@@ -9,23 +9,6 @@ moment.locale('fr');
 
 class user {
 
-	static get_message(myid, user_id, cb)
-	{
-		connexion.query('SELECT * FROM mutual_match WHERE user1 = ? AND user2 = ? OR user1 = ? AND user2 = ?', [myid, user_id, user_id, myid], (err, result) => {
-			if (result.length === 0)
-			{
-				cb(-1);
-			}
-			else
-			{
-				connexion.query('SELECT * FROM message WHERE id_author = ? AND user_id = ? OR id_author = ? AND user_id = ?', [myid, user_id, user_id, myid], (err, rows) => {
-					if (err) throw err;
-					cb(rows.map((row) => new user (row)));
-				});
-			}
-		});
-	}
-
 	static get_all_notif(myid, cb)
 	{
 		connexion.query('SELECT * FROM notification WHERE user_id = ? ORDER BY date_action DESC', [myid], (err, rows) =>{

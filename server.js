@@ -68,19 +68,18 @@ app.use(require('./middlewares/flash'));
 
 //Index
 
-app.get('/message/:id', function (req, res) {
-		let user = require('./models/user');
-		console.log("here")
-		console.log(req.params)
-		user.get_message(req.session.identifiant, req.params.id, function(message){
-
+app.get('/message/:id/:pseudo', function (req, res) {
+		let message = require('./models/message');
+		message.get_message(req.session.identifiant, req.params.id, req.params.pseudo, function(message){
 			if (message === -1)
 			{
 				res.redirect('/');
 			}
 			else
 			{
-				res.render('pages/message', {message: message});
+				//proteger le pseudo sql
+				var userpseudo = req.params.pseudo;
+				res.render('pages/message', {message: message, userpseudo: userpseudo});
 			}
 		})
 });
