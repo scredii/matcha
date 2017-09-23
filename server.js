@@ -417,16 +417,34 @@ app.post('/locate', (req, res) => {
 app.get('/galerie', function (req, res, next) {
 	let user = require('./models/user');
 	let hashtag = require('./models/hashtag');
-	user.all_profile(function(user_profile) {
-		user.check_block(req.session.identifiant, function(blocked){
-			console.log(user_profile);
-			// console.log(blocked);
-			var myid = req.session.identifiant;
-			// console.log(user_profile.myid)
-			res.render('pages/galerie', { user_profile: user_profile, blocked: blocked, myid: myid});
+	console.log(req.query)
+	if (!req.query.age_min && !req.query.age_max && !req.query.pop_min && !req.query.pop_max)
+	{
+		console.log("YYA RRR")
+		user.all_profile(function(user_profile) {
+			user.check_block(req.session.identifiant, function(blocked){
+				// console.log(user_profile);
+				// console.log(blocked);
+				var myid = req.session.identifiant;
+				user.get_my_match_g(myid, function(match_g){
+				match_g = match_g[0].match_g;
+				var filter_user = null;
+				res.render('pages/galerie', { user_profile: user_profile, blocked: blocked, myid: myid, filter_user: filter_user, match_g: match_g});
+				})
+			});
 		});
-	});
-	});
+	}
+	else
+	{
+		user.advanced_search(req.session.match_g, req.query.age_min, req.query.age_max, req.query.pop_min, req.query.pop_max, function(filter_user){
+			var user_profile = null;
+			var myid = req.session.identifiant;
+			var match_g = req.session.match_g;
+			res.render('pages/galerie', { filter_user: filter_user, user_profile: user_profile, myid: myid, match_g: match_g});
+		});
+	}
+});
+
 // FORMULAIRE DE MODIF COMPTE
 app.post('/profile', function (req, res, next) {
 	// console.log(req.body);

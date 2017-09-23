@@ -9,6 +9,25 @@ moment.locale('fr');
 
 class user {
 
+
+	static get_my_match_g(id, cb)
+	{
+		connexion.query('SELECT match_g FROM users WHERE id = ?', [id],(err, match_g) =>{
+			if (err) throw err;
+			cb(match_g);
+		});	
+	}
+
+	static advanced_search(match_g, age_min, age_max, pop_min, pop_max, cb)
+	{
+		connexion.query('SELECT U.*, L.city, L.latitude, L.longitude, P.picture, H.hashtag FROM users U INNER JOIN locations L ON U.id = L.id_content LEFT JOIN pictures P ON U.id = P.content_id AND P.pp = 1 LEFT JOIN hashtag H ON U.id = H.content_id WHERE U.age BETWEEN ? AND ? AND U.populaire BETWEEN ? AND ? ORDER BY U.id;', [age_min, age_max, pop_min, pop_max],(err, rows) =>{
+			if (err) throw err;
+			console.log(rows)
+			// cb(result);
+			cb(rows.map((row) => new user (row)));
+		});
+	}
+
 	static get_all_notif(myid, cb)
 	{
 		connexion.query('SELECT * FROM notification WHERE user_id = ? ORDER BY date_action DESC', [myid], (err, rows) =>{

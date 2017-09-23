@@ -74,9 +74,7 @@ connexion1.connect(function(err) {
 																			{
 																				connexion2.query('CREATE TABLE notification(id INT(16) PRIMARY KEY NOT NULL AUTO_INCREMENT, user_id INT(16) NOT NULL, content VARCHAR(255) NOT NULL, by_pseudo VARCHAR(255) NOT NULL, by_id INT(16) NOT NULL, isread INT(16) NOT NULL, date_action TIMESTAMP DEFAULT CURRENT_TIMESTAMP)', (err, result) =>{
 																					console.log("Table notif created");
-																					connexion2.end();
-																				});
-																				
+																					});
 																			}
 																		});
 																	}

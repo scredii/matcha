@@ -1,8 +1,66 @@
 <% include header %>
 		<% var previous_id = ""; %>
 		<div class="ui grid container">
+			<div class="ui vertical menu">
+
+				<form >
+			<div class="item">
+				<div class="header">Filtrer: </div>
+					<div class="menu">
+			<label class="item" for="age"> Age minimun: </label>
+			<center>
+			<input type="number"  name="age_min" value="0" min="0" max="99" required>
+			</center>
+			<br/>
+			<label class="item" for="age">Age maximun: </label>
+			<center>
+			
+			<input type="number"  name="age_max" value="0" min="0" max="99" required>
+			</center>
+			</div>
+			</div>
+
+  <div class="item">
+    <div class="header">popularité:</div>
+    <div class="menu">
+			<label class="item" for="pop_min"> popularité minimun: </label>
+			<center>
+			<input type="number" id="pop_min" name="pop_min" value="0" min="0" max="99" required>
+			</center>
+			<br/>
+			<label class="item" for="pop_max">popularité maximun: </label>
+			<center>
+			
+			<input type="number"  name="pop_max" value="0" min="0" max="99" required>
+			</center>
+    </div>
+    </div>
+  <div class="item">
+    <div class="header">Ville:</div>
+    <div class="field">
+		<input type="text" id="city" name="city">
+      <!--<a class="item">Shared</a>
+      <a class="item">Dedicated</a>-->
+    </div>
+  </div>
+  <div class="item">
+    <div class="header">Support</div>
+    <div class="menu">
+      <a class="item">E-mail Support</a>
+      <a class="item">FAQs</a>
+    </div>
+  </div>
+	
+	<button>
+		test
+	</button>
+		</form>
+			
+  </div>
+
+			<% if (user_profile) { %>
 			<% for (user_profile of user_profile) { %>
-			<% if (user_profile.id !== previous_id &&  user_profile.picture && user_profile.id !== myid) { %>
+			<% if (user_profile.id !== previous_id &&  user_profile.picture && user_profile.id !== myid && (user_profile.gender == match_g || match_g == "all")) { %>
 				<div class="four wide column">
 					<div class="ui link cards">
 						
@@ -59,6 +117,73 @@
 				<% } %>
 				<% previous_id = user_profile.id; %>
 				<% } %>
+				</div>
+				<% } %>
+
+			<% if (filter_user) { %>
+			<% for (filter_user of filter_user) { %>
+			<% if (filter_user.id !== previous_id &&  filter_user.picture && filter_user.id !== myid && (filter_user.gender === match_g || match_g === "all")) { %>
+				<div class="four wide column">
+					<div class="ui link cards">
+						
+						<div class="card">
+							<% if (filter_user.picture) { %>
+								<div class="image profile">
+									<img id="image_profile" src="/assets/images/user_image/<%= filter_user.picture %>">
+								</div>
+							<% } %>
+							<div class="content">
+								<!--<i class="right floated red like icon"></i>-->
+								<a class="header" href="/show/<%= filter_user.id %>">
+								<i class="<%= filter_user.gender %> icon"></i>
+								<%= filter_user.pseudo %>
+								</a>
+								<div class="meta">
+									<% if (  filter_user.age ) { %>
+										<span class="date"><%= filter_user.age %> ans</span>
+									<% } %>
+								</div>
+								<div class="description">
+									<%= filter_user.bio %>
+								</div>
+							</div>
+							<div class="extra content">
+								<div class="ui divided items">
+									<% if (  filter_user.city ) { %>
+										<a>
+										<i class="marker icon"></i>
+										<%= filter_user.city %>
+										</a>
+									<% } %>
+									<br/>
+									<% if (filter_user.isconnected == 1) { %>
+									<div class="item">
+										<p><i class="green circle icon"></i>En ligne</p>
+									</div>
+									<% } %>
+									<% if (filter_user.isconnected == 0) { %>
+									<div class="item">
+										<p><i class="red circle icon"></i>Hors ligne</p>
+									</div>
+									<% } %>
+									</div>
+									<div class="content">
+									<% if (filter_user.hashtag) { %>
+									<a class="ui teal label"> <%= filter_user.hashtag %> </a>
+									<% } %>
+									</div>
+							</div>
+						</div>
+					</div>
+					</div>
+				<% } %>
+				<% previous_id = filter_user.id; %>
+				<% } %>
+				<% } %>
 		</div>
+</div>
+
+
+
 <% include footer %>
 

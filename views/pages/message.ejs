@@ -5,6 +5,8 @@
         <div class="ui minimal comments">
         <% if (message) { %>
         <% for (message of message) {%>
+				<% previous_id = user_profile.id; %>
+
         <div class="comment">
             <div class="content">
             <a class="author"><%= message.id_author %></a>
