@@ -2,62 +2,55 @@
 		<% var previous_id = ""; %>
 		<div class="ui grid container">
 			<div class="ui vertical menu">
-
-				<form >
+		<form >
 			<div class="item">
 				<div class="header">Filtrer: </div>
 					<div class="menu">
-			<label class="item" for="age"> Age minimun: </label>
-			<center>
-			<input type="number"  name="age_min" value="0" min="0" max="99" required>
-			</center>
-			<br/>
-			<label class="item" for="age">Age maximun: </label>
-			<center>
-			
-			<input type="number"  name="age_max" value="0" min="0" max="99" required>
-			</center>
+					<label class="item" for="age"> Age minimun: </label>
+					<center>
+					<input type="number"  name="age_min" value="0" min="0" max="99" required>
+					</center>
+						<br/>
+						<label class="item" for="age">Age maximun: </label>
+					<center>
+						<input type="number"  name="age_max" value="0" min="0" max="99" required>
+					</center>
+				</div>
 			</div>
-			</div>
-
-  <div class="item">
-    <div class="header">popularité:</div>
-    <div class="menu">
-			<label class="item" for="pop_min"> popularité minimun: </label>
-			<center>
-			<input type="number" id="pop_min" name="pop_min" value="0" min="0" max="99" required>
-			</center>
-			<br/>
-			<label class="item" for="pop_max">popularité maximun: </label>
-			<center>
-			
-			<input type="number"  name="pop_max" value="0" min="0" max="99" required>
-			</center>
-    </div>
-    </div>
-  <div class="item">
-    <div class="header">Ville:</div>
-    <div class="field">
-		<input type="text" id="city" name="city">
-      <!--<a class="item">Shared</a>
-      <a class="item">Dedicated</a>-->
-    </div>
-  </div>
-  <div class="item">
-    <div class="header">Support</div>
-    <div class="menu">
-      <a class="item">E-mail Support</a>
-      <a class="item">FAQs</a>
-    </div>
-  </div>
-	
-	<button>
-		test
-	</button>
+			<div class="item">
+				<div class="header">popularité:</div>
+					<div class="menu">
+						<label class="item" for="pop_min"> popularité minimun: </label>
+						<center>
+							<input type="number" id="pop_min" name="pop_min" value="0" min="0" max="599" required>
+						</center>
+						<br/>
+						<label class="item" for="pop_max">popularité maximun: </label>
+						<center>
+							<input type="number"  name="pop_max" value="0" min="0" max="599" required>
+						</center>
+					</div>
+					</div>
+				<div class="item">
+					<div class="header">Ville:</div>
+					<div class="field">
+						<input type="text" id="city" name="city">
+					</div>
+				</div>
+				<div class="item">
+					<!--<div class="header">Support</div>-->
+					<div class="menu">
+					<!--<a class="item">E-mail Support</a>-->
+					<!--<a class="item">FAQs</a>-->
+					</div>
+				</div>
+					<center>
+					<button value="connect" name="form" id="buttonpad" type="submit" class="ui blue labeled submit icon button">
+						<i class="search icon"></i>Rechercher
+					</button>
+					</center>
 		</form>
-			
   </div>
-
 			<% if (user_profile) { %>
 			<% for (user_profile of user_profile) { %>
 			<% if (user_profile.id !== previous_id &&  user_profile.picture && user_profile.id !== myid && (user_profile.gender == match_g || match_g == "all")) { %>
@@ -104,12 +97,9 @@
 										<p><i class="red circle icon"></i>Hors ligne</p>
 									</div>
 									<% } %>
+									<a > Popularité: <%= user_profile.populaire %> </a>
 									</div>
-									<div class="content">
-									<% if (user_profile.hashtag) { %>
-									<a class="ui teal label"> <%= user_profile.hashtag %> </a>
-									<% } %>
-									</div>
+
 							</div>
 						</div>
 					</div>
@@ -133,7 +123,6 @@
 								</div>
 							<% } %>
 							<div class="content">
-								<!--<i class="right floated red like icon"></i>-->
 								<a class="header" href="/show/<%= filter_user.id %>">
 								<i class="<%= filter_user.gender %> icon"></i>
 								<%= filter_user.pseudo %>
@@ -166,11 +155,8 @@
 										<p><i class="red circle icon"></i>Hors ligne</p>
 									</div>
 									<% } %>
-									</div>
-									<div class="content">
-									<% if (filter_user.hashtag) { %>
-									<a class="ui teal label"> <%= filter_user.hashtag %> </a>
-									<% } %>
+									<a > Popularité: <%= filter_user.populaire %> </a>
+									
 									</div>
 							</div>
 						</div>

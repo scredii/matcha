@@ -1,4 +1,8 @@
 let connexion = require('../config/setup');
+let googleMapsClient = require('@google/maps').createClient({
+    key: 'AIzaSyB9Gr5C1dfF_1NnemWPlD9ideN3DG6Dn4I'
+});
+
 
 class location{
 
@@ -10,7 +14,7 @@ class location{
 		googleMapsClient.geocode({ address: city, language: 'fr-FR' }, function(err, response) {
 			if (err) throw err;
 			if (!err) {
-				cb(response.json.results[0])
+				cb(response.json.results[0]);
 			}
 		});
 	}

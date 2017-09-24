@@ -1,34 +1,52 @@
 <% include header %>
 	<div class="ui segment">
-	<div class="ui horizontal divider">Messagerie</div>
-
-        <div class="ui minimal comments">
-        <% if (message) { %>
-        <% for (message of message) {%>
-				<% previous_id = user_profile.id; %>
-
-        <div class="comment">
-            <div class="content">
-            <a class="author"><%= message.id_author %></a>
-            <div class="metadata">
-                <span class="date"><%= message.date_message.fromNow() %></span>
-            </div>
-            <div class="text">
-                <%= message.message %>
-            </div>
-            </div>
-        </div>
-        <% } %>
-        <% } %>
-
-        <form class="ui reply form">
-            <div class="field">
-            <textarea></textarea>
-            </div>
-            <div class="ui blue labeled submit icon button">
-            <i class="icon edit"></i> Add Reply
-            </div>
-        </form>
-        </div>
+		<div class="ui horizontal divider">Messagerie</div>
+			<div class="ui minimal comments">
+			<% if (message) { %>
+			<% for (message of message) {%>
+				<div class="comment">
+					<div class="content">
+						<a class="author"><%= message.author_pseudo %></a>
+							<div class="metadata">
+								<span class="date"><%= message.date_message.fromNow() %></span>
+							</div>
+							<div class="text">
+								<%= message.message %>
+							</div>
+					</div>
+				</div>
+			<% } %>
+			<% } %>
+			<span id="new"></span>
+			<form class="ui reply form" method="post">
+				<div class="field">
+					<textarea name="message"></textarea>
+				</div>
+				<center>
+					<button value="send_message" name="form" type="submit" class="ui blue labeled submit icon button">
+					<i class="icon edit"></i>Envoyer
+					</button>
+				</center>
+			</form>
+		</div>
 	</div>
+	<script type="text/javascript">
+		function getLastMsgs(){
+			$(document).ready(function(){
+				$.getJSON(window.location.pathname + "/api", function( data ) {
+					if (data.unread != 0) {
+						data.messages.forEach(function(message, count) {
+							$("#noMsg").html('');
+							$("#new").html($("#new").html()  + '<div class="comment"><div class="content"><a class="author">' + message.author_pseudo + '</a><div class="metadata"><span class="date">il y a quelques secondes</span></div><div class="text">' + message.message + '</div></div></div>');
+						});
+					}
+				});
+			});
+		};
+		getLastMsgs();
+		setInterval(getLastMsgs,4000);
+	</script>
 <% include footer %>
+
+
+

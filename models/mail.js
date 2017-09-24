@@ -5,11 +5,9 @@ var smtpTransport = mailer.createTransport("smtps://matcha42paris%40gmail.com:"+
 class send {
 			static send_lost(dest, token, cb)
 			{
-				// console.log(token[0].token)
 				var encode_tok = encodeURI(token[0].token);
 				var encode_email = encodeURI(dest);
 				var uri = "http://localhost:8080/new_pass?key=" + encode_tok + "&email="+ encode_email;
-				// console.log(uri)
 				var mail = {
 				from: "matcha42paris@gmail.com",
 				to: dest,
@@ -18,13 +16,8 @@ class send {
 				}
 				smtpTransport.sendMail(mail, function (error, response){
 				if(error){
-					//RENVOYER LES ERREURS EN CAS D'ECHEC
-					//RENVOYER LES ERREURS EN CAS D'ECHEC
-					//RENVOYER LES ERREURS EN CAS D'ECHEC
-					console.log("Erreur lors de l'envoie du mail!");
 					cb(error);
 				}else{
-					console.log("Mail envoyé avec succès!")
 					cb(Response)
 				}
 				smtpTransport.close();
@@ -33,8 +26,6 @@ class send {
 
 			static send_report(userid, byid)
 			{
-				// console.log(token[0].token)
-				// console.log(uri)
 				var mail = {
 				from: "matcha42paris@gmail.com",
 				to: "matcha42paris@gmail.com",
@@ -43,13 +34,8 @@ class send {
 				}
 				smtpTransport.sendMail(mail, function (error, response){
 				if(error){
-					//RENVOYER LES ERREURS EN CAS D'ECHEC
-					//RENVOYER LES ERREURS EN CAS D'ECHEC
-					//RENVOYER LES ERREURS EN CAS D'ECHEC
-					console.log("Erreur lors de l'envoie du mail!");
-
+					cb(error);
 				}else{
-					console.log("Mail envoyé avec succès!")
 				}
 				smtpTransport.close();
 			});

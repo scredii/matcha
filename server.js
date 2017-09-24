@@ -5,7 +5,7 @@ let app = express();
 let bcrypt = require('bcrypt');
 let bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
-let session = require('express-session');
+let session = require('cookie-session');
 let form = require('./models/form');
 let moment = require('moment');
 let fileUpload = require('express-fileupload');
@@ -15,6 +15,11 @@ let axios = require('axios');
 let fs = require('fs');
 let connexion = require('./config/setup');
 let mysql = require('mysql');
+moment.locale('fr');
+let googleMapsClient = require('@google/maps').createClient({
+    key: 'AIzaSyB9Gr5C1dfF_1NnemWPlD9ideN3DG6Dn4I'
+});
+
 // Moteur de template
 
 app.set('view engine', 'ejs');
@@ -43,13 +48,14 @@ app.use(function(req, res, next) {
     }
 });
 app.use(function checkAuth (req, res, next) {
-	console.log('checkAuth url: ' + req.url);
-	console.log('authenticated: ',req.session.authenticated);
 				// USE DB \\
 	if (req.url === '/profile' && (!req.session || !req.session.authenticated) ||
 			req.url === '/galerie' && (!req.session || !req.session.authenticated)||
 				req.url === '/show/:id' && (!req.session || !req.session.authenticated) ||
-					req.url === '/notification' && (!req.session || !req.session.authenticated)) {
+					req.url === '/notification' && (!req.session || !req.session.authenticated) ||
+					req.url === '/match' && (!req.session || !req.session.authenticated) ||
+					req.url === '/message/:id/:pseudo' && (!req.session || !req.session.authenticated) ||
+					req.url === '/message/:id/:pseudo/api' && (!req.session || !req.session.authenticated)) {
 		res.render('./pages/unauthorised', { status: 403 });
 		return;
 	}
@@ -64,9 +70,7 @@ app.use(function(req, res, next) {
 
 app.use(require('./middlewares/flash'));
 
-// Routes
-
-//Index
+// ROUTES
 
 app.get('/message/:id/:pseudo', function (req, res) {
 		let message = require('./models/message');
@@ -77,12 +81,35 @@ app.get('/message/:id/:pseudo', function (req, res) {
 			}
 			else
 			{
-				//proteger le pseudo sql
 				var userpseudo = req.params.pseudo;
 				res.render('pages/message', {message: message, userpseudo: userpseudo});
 			}
 		})
 });
+
+
+app.post('/message/:id/:pseudo', function (req, res) {
+	let message = require('./models/message');
+	let user = require('./models/user');
+
+	message.check_auth(req.session.identifiant, req.session.pseudo, req.params.id, req.params.pseudo, function(bool){
+		if (bool === -1)
+		{
+			req.flash('error', "Probleme lors de l'envoie du message");
+			res.redirect(req._parsedOriginalUrl.path);
+		}
+		else
+		{
+			if (req.body.form === "send_message" && req.body.message.trim() !== "" && req.body.message.trim() !== undefined)
+			{
+				message.add_message(req.session.identifiant, req.session.pseudo, req.params.id, req.params.pseudo, req.body.message);
+				user.add_notification_newmessage(req.params.id, req.session.identifiant, req.session.pseudo);
+				res.redirect(req._parsedOriginalUrl.path);
+			}
+		}
+	});
+});
+
 
 app.get('/match', function (req, res, next) {
 	let user = require('./models/user');
@@ -95,7 +122,7 @@ app.get('/match', function (req, res, next) {
 app.get('/notification', function (req, res) {
 	let user = require('./models/user');
 	user.get_all_notif(req.session.identifiant, (notif) =>{
-		console.log(notif)
+		// console.log(notif)
 		res.render('pages/notification', {notif: notif});
 		user.reset_notif(req.session.identifiant)	
 	});
@@ -121,7 +148,7 @@ app.get('/', function (req, res) {
 
 app.get('/notif/api', function(req, res){
 		connexion.query('SELECT COUNT(user_id) as count FROM notification WHERE isread = 0 AND user_id = ?', [req.session.identifiant], (err, result) =>{
-			console.log(result)
+			// console.log(result)
 			res.setHeader('Content-Type', 'application/json');
 			if (result){
 				res.send(JSON.stringify({"unread": result[0].count}));
@@ -129,9 +156,31 @@ app.get('/notif/api', function(req, res){
 		});
 });
 
+app.get('/message/:id/:pseudo/api', function(req, res){
+	let messagess = require('./models/message');
+
+	if (req.session.authenticated)
+	{
+		connexion.query('SELECT * FROM message WHERE (id_author = ? AND user_id = ?) AND isread = 0', [req.params.id, req.session.identifiant], (err, message) => {
+			if (err) throw err;
+			connexion.query('UPDATE message SET isread = 1 WHERE (id_author = ? AND user_id = ?)', [req.params.id, req.session.identifiant], (err, result) => {
+			if (err) throw err;
+			res.setHeader('Content-Type', 'application/json');
+				if (message){
+					res.send(JSON.stringify({"unread": message.length, messages: message}));
+				}
+			});
+		});
+	}
+	else
+	{
+		res.redirect('/');
+	}
+});
+
+
 // GESTION DU NOUVEAU MOT DE PASSE
 app.get('/new_pass', function (req, res) {
-		// console.log(req.query);
 		res.locals.token = req.query.key;
 		res.locals.email = req.query.email;
 		res.render('pages/new_pass');
@@ -140,7 +189,6 @@ app.get('/new_pass', function (req, res) {
 app.post('/show/:id', function (req, res) {
 	let user = require('./models/user');
 	let mail = require('./models/mail');
-	// console.log(req.body);
 	if (req.body.form === "block")
 	{
 		user.block_user(req.session.identifiant, req.body.myid, req.body.userid, function(){
@@ -150,7 +198,6 @@ app.post('/show/:id', function (req, res) {
 	}
 	if (req.body.form === "report")
 	{
-		console.log("form report")
 		// PENSEZ A BLOQUER LE USER ET NE PLUS LAFFICHER
 		//VEROUILLER LES SQL DU BUTTON
 		mail.send_report(req.body.userid, req.session.identifiant)
@@ -160,7 +207,6 @@ app.post('/show/:id', function (req, res) {
 	if (req.body.form === "match")
 	{
 		//VEROUILLER LES SQL DU BUTTON		
-		console.log("form match")
 		user.add_match(req.body.userid, req.session.identifiant, req.session.pseudo, function(result){
 			if (result === "already")
 			{
@@ -182,9 +228,8 @@ app.post('/show/:id', function (req, res) {
 	if (req.body.form === "unmatch")
 	{
 		// VEROUILLER LES SQL DU BUTTON		
-		console.log("form unmatch")
 		user.del_match(req.session.identifiant, req.body.userid, req.session.pseudo, function(bool){
-			console.log(bool)
+			// console.log(bool)
 			if (bool === -1)
 			{
 				req.flash('error', "Aucun match trouvé avec cet utilisateur");
@@ -203,9 +248,7 @@ app.get('/show/:id', function (req, res) {
 	let picture = require('./models/picture');
 	let hashtag = require('./models/hashtag');
 	let locate = require('./models/locate');
-	console.log(req.session)
 	if (req.session.identifiant && (req.params.id != req.session.identifiant)){
-		// user.popplus1(req.params.id);
 		user.add_notification_view(req.params.id, req.session.identifiant, req.session.pseudo)
 		user.add_view(req.session.identifiant, req.params.id);
 		user.popplus1(req.session.identifiant, req.params.id);
@@ -222,11 +265,9 @@ app.get('/show/:id', function (req, res) {
 										locate.get_dist(req.session.identifiant, function(dist){
 											if (user[0] && req.session.identifiant && dist[0])
 											{
-												console.log(mutual)
 												user[0].myid = req.session.identifiant;
 												//probleme de distance quand pas de loc
 												locate.calcCrow(dist[0].latitude, dist[0].longitude, user[0].latitude, user[0].longitude, function(diff){
-													console.log(picture);
 													res.render('pages/show', {user: user, picture: picture, pp: pp, hashtag: hashtag, diff: diff, mutual: mutual, match: match, match2: match2, lastco: lastco, pop: pop});
 												});
 											}
@@ -274,7 +315,6 @@ app.post('/new_pass', function (req, res, next) {
 			});
 });
 
-
 //Page de profil
 
 app.get('/profile', function (req, res, next) {
@@ -313,9 +353,9 @@ app.get('/logout', function (req, res, next) {
 app.get('/lost', function (req, res, next){
 	res.render('pages/lost');
 });
+
 // FORMULAIRE PAGE INDEX
 app.post('/', function (req, res, next) {
-
 	let user = require('./models/user');
 
 	// FORMULAIRE DE CONNEXION
@@ -325,7 +365,6 @@ app.post('/', function (req, res, next) {
 			if (bool === false)
 			{
 				res.render('pages/index', req.flash('error', "Merci de remplir tout les champs !"));
-				console.log("Formulaire mal rempli");
 			}
 			else
 			{
@@ -333,7 +372,6 @@ app.post('/', function (req, res, next) {
 					if (results.length == 0)
 					{
 						res.render('pages/index', req.flash('error', "compte inconnu !"));
-						console.log("Compte inconnu");
 					}
 					else
 					{
@@ -353,7 +391,6 @@ app.post('/', function (req, res, next) {
 							{
 								req.flash('error', 'Username and/or password are incorrect');
 								res.redirect('/');
-								console.log("Mot de passe incorrect");
 								bool = "";
 							}
 						});
@@ -417,17 +454,17 @@ app.post('/locate', (req, res) => {
 app.get('/galerie', function (req, res, next) {
 	let user = require('./models/user');
 	let hashtag = require('./models/hashtag');
-	console.log(req.query)
+	let locate = require('./models/locate');
+	// console.log(req.query)
 	if (!req.query.age_min && !req.query.age_max && !req.query.pop_min && !req.query.pop_max)
 	{
-		console.log("YYA RRR")
 		user.all_profile(function(user_profile) {
 			user.check_block(req.session.identifiant, function(blocked){
 				// console.log(user_profile);
 				// console.log(blocked);
 				var myid = req.session.identifiant;
 				user.get_my_match_g(myid, function(match_g){
-				match_g = match_g[0].match_g;
+				var match_g = match_g[0].match_g;
 				var filter_user = null;
 				res.render('pages/galerie', { user_profile: user_profile, blocked: blocked, myid: myid, filter_user: filter_user, match_g: match_g});
 				})
@@ -436,12 +473,51 @@ app.get('/galerie', function (req, res, next) {
 	}
 	else
 	{
-		user.advanced_search(req.session.match_g, req.query.age_min, req.query.age_max, req.query.pop_min, req.query.pop_max, function(filter_user){
-			var user_profile = null;
-			var myid = req.session.identifiant;
-			var match_g = req.session.match_g;
-			res.render('pages/galerie', { filter_user: filter_user, user_profile: user_profile, myid: myid, match_g: match_g});
-		});
+		if (req.session.identifiant)
+		{
+			console.log(req.query)
+			if (req.query.city === "" || req.query.city === undefined)
+			{
+				user.advanced_search(req.session.match_g, req.query.age_min, req.query.age_max, req.query.pop_min, req.query.pop_max, function(filter_user){
+					user.get_my_match_g(req.session.identifiant, function(match_g){
+						console.log("KOFPEKFOPWEKGOEWPJGOPEWJ")
+						var match_g = match_g[0].match_g;
+						var user_profile = null;
+						// console.log("FILTER ===>")
+						// console.log(filter_user)
+						var myid = req.session.identifiant;
+						res.render('pages/galerie', { filter_user: filter_user, user_profile: user_profile, myid: myid, match_g: match_g});
+					});
+				});
+			}
+			else if (req.query.city !== "" || req.query.city !== undefined)
+			{
+				locate.check_city(req.query.city, function(city){
+					if (city === undefined || !city)
+					{
+						req.flash('error', "Aucune ville trouvée");
+						res.redirect('/galerie');
+					}
+					else
+					{
+						var lat = city.geometry.location.lat;
+						var lng = city.geometry.location.lng;
+						user.advanced_search_and_city(req.session.match_g, req.query.age_min, req.query.age_max, req.query.pop_min, req.query.pop_max, lat, lng, function(filter_user){
+							user.get_my_match_g(req.session.identifiant, function(match_g){
+								var match_g = match_g[0].match_g;
+								var myid = req.session.identifiant;
+								var user_profile = null;
+								res.render('pages/galerie', { filter_user: filter_user, user_profile: user_profile, myid: myid, match_g: match_g});
+							});
+						});
+					}
+				});
+			}
+		}
+		else
+		{
+			res.redirect('/')
+		}
 	}
 });
 
@@ -527,7 +603,7 @@ app.post('/profile', function (req, res, next) {
 	}
 	else if (req.body.form === 'del_picture')
 	{
-		console.log(req.body.picture);
+		// console.log(req.body.picture);
 		picture.del(req.body.picture, req.session.identifiant, function(bool){
 			if (bool === false)
 			{
@@ -583,7 +659,38 @@ app.post('/lost', function (req, res, next) {
 	});
 });
 
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  var err = new Error('Matcha :: Page non trouvée');
+  err.status = 404;
+  next(err);
+});
+
+// error handlers
+
+// development error handler
+// will print stacktrace
+if (app.get('env') === 'development') {
+  app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+      msg: err.message,
+    error: {}
+    });
+  });
+}
+
+// production error handler
+// no stacktraces leaked to user
+app.use(function(err, req, res, next) {
+  res.status(err.status || 500);
+  res.render('pages/unauthorised', {
+    msg: err.status,
+    error: {}
+  });
+});
 // ECOUTE PORT 8080
 app.listen(4242, function () {
-	console.log('SERVEUR OK BITCH!');
+	console.log('SERVEUR OK BITCH! JE RUN EN', app.get('env'));
 });

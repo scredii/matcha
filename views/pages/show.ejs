@@ -2,7 +2,7 @@
 	<div class="ui segment">
 		<center>
 		<% if (user[0]) { %>
-			<h2 >
+			<h2>
 				<span><%= user[0].name %> <%= user[0].lastname %></span>
 				<div class="sub header"> Alias: <%= user[0].pseudo %></div>
 			</h2>
@@ -24,42 +24,30 @@
 								<% if (  user[0].age !== null ) { %>
 									<span class="date"><%= user[0].age %> ans</span>
 								<% } %>
-
-
 								<% if (  user[0].match_g === "male" && user[0].gender === "male") { %>
 								<br/>
 								<span class="date">Orientation: <i class="gay icon"></i></span>
 								<% } %>
-
 								<% if (  user[0].match_g === "female" && user[0].gender === "male") { %>
 								<br/>
 								<span class="date">Orientation: <i class="heterosexual icon"></i></span>
 								<% } %>
-
 								<% if (  user[0].match_g === "all" && user[0].gender === "male") { %>
 								<br/>
 								<span class="date">Orientation: <i class="intergender icon"></i></span>
 								<% } %>
-
-
 								<% if (  user[0].match_g === "male" && user[0].gender === "female") { %>
 								<br/>
 								<span class="date">Orientation: <i class="heterosexual icon"></i></span>
 								<% } %>
-
 								<% if (  user[0].match_g === "female" && user[0].gender === "female") { %>
 								<br/>
 								<span class="date">Orientation: <i class="lesbian icon"></i></span>
 								<% } %>
-
 								<% if (  user[0].match_g === "all" && user[0].gender === "female") { %>
 								<br/>
 								<span class="date">Orientation: <i class="intergender icon"></i></span>
 								<% } %>
-
-
-
-
 								</div>
 								<div class="ui  clearing divider"></div>
 								<div class="description">
@@ -81,10 +69,7 @@
 							<% } %>
 							</div>
 						</div>
-
-		<!--</div>-->
 </div>
-
 		<% if (hashtag.length !== 0) { %>
 		<div class="ui divided items">
 			<div class="item">
@@ -92,8 +77,6 @@
 		
 		<div class="field">
 		<br />
-			
-
 		<% for (hashtag of hashtag) { %>
 		<a class="ui teal label"> <%= hashtag.hashtag %> </a>
 			<% } %>
@@ -135,21 +118,12 @@
 			</div>
 			<% } %>
 			<% } %>
-			<% if (mutual[0]) { %>
-			<% if (mutual[0].user_like == user[0].myid && mutual[0].by_id == user[0].id) { %>
-			<div class="meta">
-				<p>Vous vous liké mutuellement <i class="heart red icon"></i></p>
-				
-			</div>
-			<% } %>
-			<% } %>
 		</div>
 		</div>
 					<% if (picture) {  %>
 					<div class="ui medium bordered image ">
 						<div class="ui grid ">
 						<% for (picture of picture) { %>
-						<!--<div class="four wide column">-->
 							<div class="ui tiny images">
 								<img class="ui image" src="/assets/images/user_image/<%= picture.picture %>">
 							</div>
@@ -179,10 +153,6 @@
 				</form>
 			<center>
 			<% } %>
-				
-					<!--<button value="modif" name="form" type="submit" class="ui blue labeled submit icon button">
-				<i class="icon edit"></i>Mettre a jour
-			</button>-->
 			<% if (!user[0]) { %>
 			<p> Utilisateur inconnu </p>
 		<% } %>
