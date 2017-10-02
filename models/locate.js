@@ -23,21 +23,16 @@ class location{
 	{
 		connexion.query('SELECT * FROM locations WHERE id_content = ?', [identifiant], (err, user) =>{
 			if (err) throw err;
-			console.log(user);
 			if (user.length === 0)
 			{
-				console.log("user non trouvé")
 				connexion.query('INSERT INTO locations SET latitude = ?, longitude = ?, city = ?, id_content = ?', [address.coords.latitude.toFixed(3), address.coords.longitude.toFixed(3), address.address.city, identifiant], (err, result) => {
 					if (err) throw err;
-					console.log(result);
 				});
 			}
 			else
 			{
-				console.log("user trouvé")
 				connexion.query('UPDATE locations SET latitude = ?, longitude = ?, city = ? WHERE id_content = ?', [address.coords.latitude.toFixed(3), address.coords.longitude.toFixed(3), address.address.city, identifiant], (err, result) => {
 					if (err) throw err;
-					console.log(result);
 				});
 			}
 		});
@@ -45,26 +40,18 @@ class location{
 
 		static	save_locate_city(address, city, identifiant)
 	{
-		console.log(address);
-		console.log(city);
-		console.log(identifiant);
 		connexion.query('SELECT * FROM locations WHERE id_content = ?', [identifiant], (err, user) =>{
 			if (err) throw err;
-			console.log(user);
 			if (user.length === 0)
 			{
-				console.log("user non trouvé")
 				connexion.query('INSERT INTO locations SET latitude = ?, longitude = ?, city = ?, id_content = ?', [address.geometry.location.lat.toFixed(3), address.geometry.location.lng.toFixed(3), address.formatted_address, identifiant], (err, result) => {
 					if (err) throw err;
-					console.log(result);
 				});
 			}
 			else
 			{
-				console.log("user trouvé")
 				connexion.query('UPDATE locations SET latitude = ?, longitude = ?, city = ? WHERE id_content = ?', [address.geometry.location.lat.toFixed(3), address.geometry.location.lng.toFixed(3), address.formatted_address, identifiant], (err, result) => {
 					if (err) throw err;
-					console.log(result);
 				});
 			}
 		});
@@ -79,8 +66,6 @@ class location{
 		});
 	}
 
-
-// alert(calcCrow(59.3293371,13.4877472,59.3225525,13.4619422).toFixed(1));
 	static get_dist(myid, cb)
 	{
 		connexion.query('SELECT locations.latitude, locations.longitude from locations WHERE id_content = ?', [myid], (err, result) => {
@@ -115,17 +100,5 @@ class location{
     {
         return Value * Math.PI / 180;
     }
-    // var geocoder =  new google.maps.Geocoder();
-    // geocoder.geocode( { 'address': address}, function(results, status) {
-    //       if (status == google.maps.GeocoderStatus.OK) {
-
-    //         var Lat = results[0].geometry.location.lat();
-    //         var Lng = results[0].geometry.location.lng();
-
-
-    //       } else {
-    //         alert("Something got wrong " + status);
-    //       }
-    //     });
 
 module.exports = location;

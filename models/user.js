@@ -17,6 +17,14 @@ class user {
 		});	
 	}
 
+	static search_by_hashtag(hashtag, cb)
+	{
+		connexion.query('SELECT U.*, L.city, L.latitude, L.longitude, P.picture, H.hashtag FROM users U INNER JOIN locations L ON U.id = L.id_content LEFT JOIN pictures P ON U.id = P.content_id AND P.pp = 1 INNER JOIN hashtag H ON H.hashtag = ? WHERE U.id = H.content_id ORDER BY U.id;', [hashtag], (err, rows) => {
+			if (err) throw err;
+			cb(rows.map((row) => new user (row)));
+		});
+	}
+
 	static advanced_search_and_city(match_g, age_min, age_max, pop_min, pop_max, lat, lng, cb)
 	{
 			var lat_min = lat - 0.20;
@@ -273,8 +281,6 @@ class user {
 	static del_match(myid, user_id, mypseudo, cb)
 	{
 		connexion.query('SELECT * FROM mutual_match WHERE user1 = ? AND user2 = ? OR user1 = ? AND user2 = ?', [myid, user_id, user_id, myid], (err, result) => {
-			console.log("RESULT DU DEL");
-			console.log(result);
 			if (result.length === 0)
 			{
 				//pas de mutual
@@ -413,7 +419,6 @@ class user {
 			}
 			else
 			{
-				console.log("ERROR")
 			}
 		});
 	}

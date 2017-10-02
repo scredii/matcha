@@ -6,26 +6,15 @@ class message {
 	static get_message(myid, user_id, user_pseudo, cb)
 	{
 		connexion.query('SELECT * FROM mutual_match WHERE (user1 = ? AND user2 = ?) OR (user1 = ? AND user2 = ?)', [myid, user_id, user_id, myid], (err, result) => {
-					console.log(result)
-		
 			if (result == undefined)
 			{
 				cb(-1);
 			}
-			// if (result.length == 0)
-			// {
-			// 	cb(-1);
-			// }
 			else
 			{
 				connexion.query('SELECT pseudo, id FROM users WHERE id = ? AND pseudo = ?', [user_id, user_pseudo], (err, user_ret) => {
 					if (err) throw err;
-					console.log(user_ret)
 					if (user_ret.length === 0)
-					{
-						cb(-1);
-					}
-					if(user_ret[0].pseudo != user_pseudo || user_ret[0].id != user_id)
 					{
 						cb(-1);
 					}
@@ -51,7 +40,6 @@ class message {
 			else
 			{
 				connexion.query('SELECT pseudo, id FROM users WHERE id = ? AND pseudo = ?', [user_id, user_pseudo], (err, user_ret) => {
-					console.log(user_ret)
 					if (err) throw err;
 					if (user_ret.length === 0)
 					{

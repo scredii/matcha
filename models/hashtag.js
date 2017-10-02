@@ -9,6 +9,10 @@ class hashtag {
 				{
 					hashtag = '#' + hashtag;
 				}
+				if (hashtag.length > 10)
+				{
+					return;
+				}
 				connexion.query('INSERT INTO hashtag SET hashtag = ?, content_id = ?', [hashtag, identifiant], (err, result) => {
 					if (err) throw err;
 					cb(result);
@@ -30,13 +34,6 @@ class hashtag {
 				});
 			}
 
-			// static all_tag(cb)
-			// {
-			// 	connexion.query('SELECT hashtag, content_id FROM hashtag GROUP BY hashtag.content_id', (err, result) => {
-			// 		if (err) throw err;
-			// 		if (result) cb(result);
-			// 	});
-			// }
 }
 
 module.exports = hashtag;

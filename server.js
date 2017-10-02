@@ -96,7 +96,7 @@ app.post('/message/:id/:pseudo', function (req, res) {
 		if (bool === -1)
 		{
 			req.flash('error', "Probleme lors de l'envoie du message");
-			res.redirect(req._parsedOriginalUrl.path);
+			res.redirect(req.originalUrl);
 		}
 		else
 		{
@@ -104,7 +104,7 @@ app.post('/message/:id/:pseudo', function (req, res) {
 			{
 				message.add_message(req.session.identifiant, req.session.pseudo, req.params.id, req.params.pseudo, req.body.message);
 				user.add_notification_newmessage(req.params.id, req.session.identifiant, req.session.pseudo);
-				res.redirect(req._parsedOriginalUrl.path);
+				res.redirect(req.originalUrl);
 			}
 		}
 	});
@@ -132,7 +132,6 @@ app.get('/notification', function (req, res) {
 app.post('/del_tag', function (req, res, next){
 	let hashtag = require('./models/hashtag');
 	hashtag.del_tag(req.body.hashtag, req.body.id, req.session.identifiant ,function(){
-		//redirect non FONCTIONNELE
 		return res.render('pages/index', req.flash('error', "Merci de remplir tout les champs !"));
 	});
 
@@ -148,7 +147,6 @@ app.get('/', function (req, res) {
 
 app.get('/notif/api', function(req, res){
 		connexion.query('SELECT COUNT(user_id) as count FROM notification WHERE isread = 0 AND user_id = ?', [req.session.identifiant], (err, result) =>{
-			// console.log(result)
 			res.setHeader('Content-Type', 'application/json');
 			if (result){
 				res.send(JSON.stringify({"unread": result[0].count}));
@@ -189,6 +187,16 @@ app.get('/new_pass', function (req, res) {
 app.post('/show/:id', function (req, res) {
 	let user = require('./models/user');
 	let mail = require('./models/mail');
+	if (!Number.isInteger(parseInt(req.body.myid)))
+	{
+			res.redirect('/galerie');
+			return;
+	}
+	if (!Number.isInteger(parseInt(req.body.userid)))
+	{
+		res.redirect('/galerie');
+		return;
+	}
 	if (req.body.form === "block")
 	{
 		user.block_user(req.session.identifiant, req.body.myid, req.body.userid, function(){
@@ -198,47 +206,42 @@ app.post('/show/:id', function (req, res) {
 	}
 	if (req.body.form === "report")
 	{
-		// PENSEZ A BLOQUER LE USER ET NE PLUS LAFFICHER
-		//VEROUILLER LES SQL DU BUTTON
 		mail.send_report(req.body.userid, req.session.identifiant)
 		req.flash('success', "Utilisateur signalé, le profil va etre analysé. Merci !")
 		res.redirect('/galerie');
 	}
 	if (req.body.form === "match")
 	{
-		//VEROUILLER LES SQL DU BUTTON		
 		user.add_match(req.body.userid, req.session.identifiant, req.session.pseudo, function(result){
 			if (result === "already")
 			{
 				req.flash('error', "Vous avez deja envoyé un match a cette personne");
-				res.redirect(req._parsedOriginalUrl.path);
+				res.redirect(req.originalUrl);
 			}
 			else if (result === "add_pic")
 			{
 				req.flash('error', "Seul les membres avec une photo peuvent liker des utilisateurs");
-				res.redirect(req._parsedOriginalUrl.path);
+				res.redirect(req.originalUrl);
 			}
 			else
 			{
 			req.flash('success', "Un match vient d'etre envoyé a cet utilisateur");
-			res.redirect(req._parsedOriginalUrl.path);
+			res.redirect(req.originalUrl);
 			}
 		});
 	}
 	if (req.body.form === "unmatch")
 	{
-		// VEROUILLER LES SQL DU BUTTON		
 		user.del_match(req.session.identifiant, req.body.userid, req.session.pseudo, function(bool){
-			// console.log(bool)
 			if (bool === -1)
 			{
 				req.flash('error', "Aucun match trouvé avec cet utilisateur");
-				res.redirect(req._parsedOriginalUrl.path);
+				res.redirect(req.originalUrl);
 			}
 			else if (bool === 1)
 			{
 				req.flash('success', "Match supprimé");
-				res.redirect(req._parsedOriginalUrl.path);
+				res.redirect(req.originalUrl);
 			}
 		});
 	}
@@ -266,14 +269,12 @@ app.get('/show/:id', function (req, res) {
 											if (user[0] && req.session.identifiant && dist[0])
 											{
 												user[0].myid = req.session.identifiant;
-												//probleme de distance quand pas de loc
 												locate.calcCrow(dist[0].latitude, dist[0].longitude, user[0].latitude, user[0].longitude, function(diff){
 													res.render('pages/show', {user: user, picture: picture, pp: pp, hashtag: hashtag, diff: diff, mutual: mutual, match: match, match2: match2, lastco: lastco, pop: pop});
 												});
 											}
 											else
 											{
-												// res.render('pages/index', {user: user, picture: picture, pp: pp, hashtag: hashtag});
 												req.flash('error', "Vous ne pouvez pas consulter de profil si nous n'avons pas votre locatisation !")
 												res.redirect('/');
 											}
@@ -294,14 +295,14 @@ app.post('/new_pass', function (req, res, next) {
 				if (bool === false)
 				{
 					req.flash('error', "Merci de remplir tout les champs !")
-					res.redirect(req._parsedOriginalUrl.path);
+					res.redirect(req.originalUrl);
 				}
 				else
 				{
 					if (req.body.password !== req.body.confirm_pass)
 					{
 						req.flash('error', "Les mots de passe ne correspondent pas !")
-						res.redirect(req._parsedOriginalUrl.path);
+						res.redirect(req.originalUrl);
 					}
 					else
 					{
@@ -322,7 +323,6 @@ app.get('/profile', function (req, res, next) {
 	let hashtag = require('./models/hashtag');
 	let picture = require('./models/picture');
 	let locate = require('./models/locate');
-	// user.check_block(req.session.identifiant, function(user_blocked){
 		user.search_account(req, function (user){
 			hashtag.all(req.session.identifiant, function(hashtag){
 				picture.profilpic(req.session.identifiant, function(pp){
@@ -335,10 +335,8 @@ app.get('/profile', function (req, res, next) {
 			});
 		});
 	});
-// });
 
 
-//delogue
 app.get('/logout', function (req, res, next) {
 		let user = require('./models/user')
 		if (req.session && req.session.identifiant)
@@ -378,7 +376,6 @@ app.post('/', function (req, res, next) {
 						user.compare_pass(results, req.body, function(bool){
 							if (bool === true)
 							{
-								// ACTIVATION DE LA SESSION + REDIRECTION.
 								req.session.authenticated = true;
 								req.session.email = results[0].email;
 								req.session.identifiant = results[0].id;
@@ -446,7 +443,6 @@ app.post('/', function (req, res, next) {
 app.post('/locate', (req, res) => {
 	let location = require('./models/locate');
 	location.save_locate(req.body.longitude, req.session.identifiant)
-	// req.flash('success', "Profil mis a jour avec succés !");	
 	res.redirect('/profile');
 });
 
@@ -455,18 +451,18 @@ app.get('/galerie', function (req, res, next) {
 	let user = require('./models/user');
 	let hashtag = require('./models/hashtag');
 	let locate = require('./models/locate');
-	// console.log(req.query)
-	if (!req.query.age_min && !req.query.age_max && !req.query.pop_min && !req.query.pop_max)
+if (req.query.form === "search")
+{
+	if (!req.query.age_min && !req.query.age_max && !req.query.pop_min && !req.query.pop_max )
 	{
 		user.all_profile(function(user_profile) {
 			user.check_block(req.session.identifiant, function(blocked){
-				// console.log(user_profile);
-				// console.log(blocked);
 				var myid = req.session.identifiant;
 				user.get_my_match_g(myid, function(match_g){
 				var match_g = match_g[0].match_g;
 				var filter_user = null;
-				res.render('pages/galerie', { user_profile: user_profile, blocked: blocked, myid: myid, filter_user: filter_user, match_g: match_g});
+				var users = null;
+				res.render('pages/galerie', { user_profile: user_profile, blocked: blocked, myid: myid, filter_user: filter_user, match_g: match_g, users: users});
 				})
 			});
 		});
@@ -475,22 +471,19 @@ app.get('/galerie', function (req, res, next) {
 	{
 		if (req.session.identifiant)
 		{
-			console.log(req.query)
-			if (req.query.city === "" || req.query.city === undefined)
+			if (req.query.city.trim() === "" || req.query.city === undefined)
 			{
 				user.advanced_search(req.session.match_g, req.query.age_min, req.query.age_max, req.query.pop_min, req.query.pop_max, function(filter_user){
 					user.get_my_match_g(req.session.identifiant, function(match_g){
-						console.log("KOFPEKFOPWEKGOEWPJGOPEWJ")
 						var match_g = match_g[0].match_g;
 						var user_profile = null;
-						// console.log("FILTER ===>")
-						// console.log(filter_user)
+						var users = null;
 						var myid = req.session.identifiant;
-						res.render('pages/galerie', { filter_user: filter_user, user_profile: user_profile, myid: myid, match_g: match_g});
+						res.render('pages/galerie', { filter_user: filter_user, user_profile: user_profile, myid: myid, match_g: match_g, users: users});
 					});
 				});
 			}
-			else if (req.query.city !== "" || req.query.city !== undefined)
+			else if (req.query.city.trim() !== "" || req.query.city !== undefined)
 			{
 				locate.check_city(req.query.city, function(city){
 					if (city === undefined || !city)
@@ -506,47 +499,68 @@ app.get('/galerie', function (req, res, next) {
 							user.get_my_match_g(req.session.identifiant, function(match_g){
 								var match_g = match_g[0].match_g;
 								var myid = req.session.identifiant;
+								var users = null;
 								var user_profile = null;
-								res.render('pages/galerie', { filter_user: filter_user, user_profile: user_profile, myid: myid, match_g: match_g});
+								res.render('pages/galerie', { filter_user: filter_user, user_profile: user_profile, myid: myid, match_g: match_g, users: users});
 							});
 						});
 					}
 				});
 			}
 		}
-		else
-		{
-			res.redirect('/')
-		}
 	}
+}
+else if (req.query.form === "search_hashtag" && req.query.hashtag.trim() !== "" && req.query.hashtag !== undefined)
+{
+	let user = require('./models/user')
+	user.search_by_hashtag(req.query.hashtag, function(users){
+		var myid = req.session.identifiant;
+		user.get_my_match_g(myid, function(match_g){
+		var match_g = match_g[0].match_g;
+		var filter_user = null;
+		var user_profile = null;
+
+		res.render('pages/galerie', {users: users,  user_profile: user_profile, myid: myid, filter_user: filter_user, match_g: match_g});
+		});
+	});
+}
+else
+		{
+				user.all_profile(function(user_profile) {
+			user.check_block(req.session.identifiant, function(blocked){
+				var myid = req.session.identifiant;
+				user.get_my_match_g(myid, function(match_g){
+				var match_g = match_g[0].match_g;
+				var filter_user = null;
+				var users = null;
+				res.render('pages/galerie', { user_profile: user_profile, blocked: blocked, myid: myid, filter_user: filter_user, match_g: match_g, users: users});
+				})
+			});
+		});
+		}
 });
 
 // FORMULAIRE DE MODIF COMPTE
 app.post('/profile', function (req, res, next) {
-	// console.log(req.body);
 	let user = require('./models/user');
 	let picture = require('./models/picture')
 	if (req.body.form === 'modif')
 	{	
 		form.valid(req.body, function(bool){
-			console.log(req.body.age);
 			if (req.body.age.length > 2 || !Number.isInteger(parseInt(req.body.age)))
 			{
 				req.flash('error', "Ton age n'est pas valide");
 				res.redirect('/profile');
-				console.log("Formulaire mal rempli");
 				return;
 			}
 			if (bool === false)
 			{
 				req.flash('error', "Merci de remplir tout les champs !");
 				res.redirect('/profile');
-				console.log("Formulaire mal rempli");
 			}
 			else
 			{
 				user.maj_account(req.body, req.session, function(ret){
-					// console.log(ret);
 				});
 				req.flash('success', "Profil mis a jour avec succés !");
 				res.redirect('/profile');
@@ -564,7 +578,6 @@ app.post('/profile', function (req, res, next) {
 		{
 			let hashtag = require('./models/hashtag');
 			hashtag.add(req.body.hashtag, req.session.identifiant, function(cb){
-				console.log(cb);
 			});
 			res.redirect('/profile');
 		}
@@ -603,7 +616,6 @@ app.post('/profile', function (req, res, next) {
 	}
 	else if (req.body.form === 'del_picture')
 	{
-		// console.log(req.body.picture);
 		picture.del(req.body.picture, req.session.identifiant, function(bool){
 			if (bool === false)
 			{
@@ -618,7 +630,6 @@ app.post('/profile', function (req, res, next) {
 	}
 	else if (req.body.form === 'profil_picture')
 	{
-		console.log(req.body)
 		picture.pp(req.body.picture, req.session.identifiant);
 		req.flash('success', "Photo de profil mis a jour");
 		res.redirect('/profile');
@@ -630,12 +641,10 @@ app.post('/lost', function (req, res, next) {
 	let user = require('./models/user');
 	let mail = require('./models/mail');
 	form.valid(req.body, function(bool){
-		console.log(bool);
 		if (bool === false)
 		{
 			req.flash('error', "Merci de renseignez votre email !");
 			res.redirect('/lost');
-			console.log("Formulaire mal rempli");
 		}
 		else
 		{
@@ -647,7 +656,6 @@ app.post('/lost', function (req, res, next) {
 				}
 				else
 				{
-				// console.log(token);
 				mail.send_lost(req.body.email, token, function(ret){
 				});
 				req.flash('success', "Un mail vient de vous etre envoyé !");
@@ -669,8 +677,6 @@ app.use(function(req, res, next) {
 
 // error handlers
 
-// development error handler
-// will print stacktrace
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
@@ -681,8 +687,6 @@ if (app.get('env') === 'development') {
   });
 }
 
-// production error handler
-// no stacktraces leaked to user
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('pages/unauthorised', {
@@ -690,7 +694,7 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
-// ECOUTE PORT 8080
+
 app.listen(4242, function () {
-	console.log('SERVEUR OK BITCH! JE RUN EN', app.get('env'));
+	console.log('SERVEUR OK BITCH ! RUN IN ', app.get('env'));
 });

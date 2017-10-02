@@ -41,11 +41,10 @@ class picture {
 							else
 							{	
 								sizeOf('public/images/user_image/'+id_picture, function (err, dimensions) {
-									// if (err) console.log(err);
 									if (!dimensions)
 									{
 										fs.unlink('public/images/user_image/'+id_picture, (err) =>{
-											if (err) console.log(err);
+											if (err) throw err;
 										});
 										cb(false);
 										return;
@@ -92,7 +91,7 @@ class picture {
 						connexion.query('DELETE FROM pictures WHERE content_id = ? AND picture = ?', [identifiant, picture], (err, result) => {
 						if (err) throw err;
 							fs.unlink('public/images/user_image/'+picture, (err) =>{
-									if (err) console.log(err);
+									if (err) throw err;
 							});
 						cb(true);
 						});

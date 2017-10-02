@@ -87,8 +87,7 @@ Inside the `<head>` of your HTML:
             staticMap: true         // map image URL (boolean or options object)
         };
         geolocator.locate(options, function (err, location) {
-            if (err) return console.log(err);
-            console.log(location);
+            if (err) throw err;
         });
     };
 

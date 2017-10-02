@@ -36,14 +36,21 @@
 			});
 		}
 			setInterval(get_notif, 3000);
+
+			function loader()
+			{
+				$('.ui.disabled.inverted.dimmer').removeClass('ui disabled inverted dimmer').addClass('ui active inverted dimmer', setTimeout(function () {
+        $('.ui.active.inverted.dimmer').removeClass('ui active inverted dimmer').addClass('ui disabled inverted dimmer');
+   		 }, 10000));
+			}
 	</script>
 	<script type="text/javascript" src="/assets/scripts.js"></script>
 	<style>
-				footer
+		footer
 		{
-			    position: fixed;
-    bottom: 0pt;
-    left: 0pt;
+		position: fixed;
+		bottom: 0pt;
+		left: 0pt;
 		}
 		#ld {
 			display:none

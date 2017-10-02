@@ -32,7 +32,6 @@
 			<% } %>
 	</div>
 </div>
-	<!-- FORMULAIRE DE CONNEXION -->
 <form class="ui tiny form segment" method="post" >
 	<!--<p><strong>à propos de vous<strong></p><br>-->
 	<div class="one field">
@@ -86,7 +85,7 @@
 		<label for="localisation">localisation</label>
 		<div class="field">
 			<label for="locate">Je souhaite etre localisé :
-			<input type="checkbox" id="locate" name="locate" value="auto" onclick="locate_me();">
+			<input type="checkbox" id="locate" name="locate" value="auto" onclick="locate_me();loader();">
 		</label>
 		</div>
 		<label for="localisation">Ou rentre ta ville :</label>
@@ -102,7 +101,9 @@
 <a href="/lost">Changer mon mot de passe</a>
 </form>
 	</div>
-
+  <div class="ui disabled inverted dimmer" height=100%;>
+	  <div class="ui text loader">Localisation en cours</div>
+  </div>
 	
 	<!--FORMULAIRE HASHTAG-->
 <div class="ui horizontal segments">
@@ -152,48 +153,24 @@
 		
 			<a class="orange card">
 		<div class="image">
- <div class="ui small basic icon buttons">
-<form class="ui form" method="post">
-	<input type="hidden" value="<%=  picture.picture %>" name="picture"/>
-	<button value="del_picture" name="form" type="submit"  class="ui button">
-		<i class="delete icon"></i>
-	</button>
-</form>
- </div>
-			<img class="ui small rounded image" src="assets/images/user_image/<%=  picture.picture %>">
-			<form class="ui form" method="post">
-				<input type="hidden" value="<%=  picture.picture %>" name="picture"/>
-				<button value="profil_picture" name="form" type="submit" class="ui teal button">Profile</button>
-			</form>
+		<div class="ui small basic icon buttons">
+		<form class="ui form" method="post">
+			<input type="hidden" value="<%=  picture.picture %>" name="picture"/>
+			<button value="del_picture" name="form" type="submit"  class="ui button">
+				<i class="delete icon"></i>
+			</button>
+		</form>
 		</div>
-		
+		<img class="ui small rounded image" src="assets/images/user_image/<%=  picture.picture %>">
+		<form class="ui form" method="post">
+			<input type="hidden" value="<%=  picture.picture %>" name="picture"/>
+			<button value="profil_picture" name="form" type="submit" class="ui teal button">Profile</button>
+		</form>
+	</div>
 		<% } %>
 		</div>
 </form>
 </div>
 </div>
-<!--<script>
-var x = document.getElementById("demo");
 
-function getLocation() {
-		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(showPosition);
-		}
-		else { 
-				x.innerHTML = "Geolocation is not supported by this browser.";
-		}
-}
-
-function showPosition(position) {
-			console.log("HERE");
-			console.log(position);
-	
-		x.innerHTML = "Latitude: " + position.coords.latitude + 
-		"<br>Longitude: " + position.coords.longitude;
-		return axios.post('http://localhost:8080/locate', {
-        longitude: position.coords.longitude, 
-        latitude: position.coords.latitude, 
-    })
-}
-</script>-->
 <% include footer %>

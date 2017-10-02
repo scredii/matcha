@@ -13,7 +13,7 @@
 						<br/>
 						<label class="item" for="age">Age maximun: </label>
 					<center>
-						<input type="number"  name="age_max" value="0" min="0" max="99" required>
+						<input type="number"  name="age_max" value="99" min="0" max="99" required>
 					</center>
 				</div>
 			</div>
@@ -27,7 +27,7 @@
 						<br/>
 						<label class="item" for="pop_max">popularité maximun: </label>
 						<center>
-							<input type="number"  name="pop_max" value="0" min="0" max="599" required>
+							<input type="number"  name="pop_max" value="99" min="0" max="599" required>
 						</center>
 					</div>
 					</div>
@@ -38,18 +38,30 @@
 					</div>
 				</div>
 				<div class="item">
-					<!--<div class="header">Support</div>-->
-					<div class="menu">
-					<!--<a class="item">E-mail Support</a>-->
-					<!--<a class="item">FAQs</a>-->
-					</div>
 				</div>
 					<center>
-					<button value="connect" name="form" id="buttonpad" type="submit" class="ui blue labeled submit icon button">
+					<button value="search" name="form" id="buttonpad" type="submit" class="ui blue labeled submit icon button">
 						<i class="search icon"></i>Rechercher
 					</button>
 					</center>
 		</form>
+						<div class="item">
+					<div class="header">hashtag: </div>
+					<div class="menu">
+					<div class="field">
+					<form>
+					<center>
+						<input type="text" id="hashtag" name="hashtag">
+					</center>
+					</div>
+					</div>
+					<center>
+					<button value="search_hashtag" name="form" id="buttonpad" type="submit" class="ui blue labeled submit icon button" style="margin-top:20px;">
+						<i class="search icon"></i>Rechercher
+					</button>
+					</center>
+					</form>
+				</div>
   </div>
 			<% if (user_profile) { %>
 			<% for (user_profile of user_profile) { %>
@@ -64,7 +76,6 @@
 								</div>
 							<% } %>
 							<div class="content">
-								<!--<i class="right floated red like icon"></i>-->
 								<a class="header" href="/show/<%= user_profile.id %>">
 								<i class="<%= user_profile.gender %> icon"></i>
 								<%= user_profile.pseudo %>
@@ -164,6 +175,63 @@
 					</div>
 				<% } %>
 				<% previous_id = filter_user.id; %>
+				<% } %>
+				<% } %>
+
+							<% if (users) { %>
+			<% for (users of users) { %>
+			<% if (users.id !== previous_id &&  users.picture && users.id !== myid && (users.gender === match_g || match_g === "all")) { %>
+				<div class="four wide column">
+					<div class="ui link cards">
+						
+						<div class="card">
+							<% if (users.picture) { %>
+								<div class="image profile">
+									<img id="image_profile" src="/assets/images/user_image/<%= users.picture %>">
+								</div>
+							<% } %>
+							<div class="content">
+								<a class="header" href="/show/<%= users.id %>">
+								<i class="<%= users.gender %> icon"></i>
+								<%= users.pseudo %>
+								</a>
+								<div class="meta">
+									<% if (  users.age ) { %>
+										<span class="date"><%= users.age %> ans</span>
+									<% } %>
+								</div>
+								<div class="description">
+									<%= users.bio %>
+								</div>
+							</div>
+							<div class="extra content">
+								<div class="ui divided items">
+									<% if (  users.city ) { %>
+										<a>
+										<i class="marker icon"></i>
+										<%= users.city %>
+										</a>
+									<% } %>
+									<br/>
+									<% if (users.isconnected == 1) { %>
+									<div class="item">
+										<p><i class="green circle icon"></i>En ligne</p>
+									</div>
+									<% } %>
+									<% if (users.isconnected == 0) { %>
+									<div class="item">
+										<p><i class="red circle icon"></i>Hors ligne</p>
+									</div>
+									<% } %>
+									<a > Popularité: <%= users.populaire %> </a>
+									
+									</div>
+							</div>
+						</div>
+					</div>
+					</div>
+				<% } %>
+				<% previous_id = users.id; %>
 				<% } %>
 				<% } %>
 		</div>
